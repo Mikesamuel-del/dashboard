@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import { useAuth } from "../auth/AuthContext";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
@@ -25,7 +26,15 @@ export default function Account() {
         setServerUser(data);
         setName(data?.name || "");
         setPhone(data?.phone || "");
-        updateUser({ name: data?.name, phone: data?.phone, package: data?.package, balance: data?.balance });
+        updateUser({
+          name: data?.name,
+          phone: data?.phone,
+          package: data?.package,
+          balance: data?.balance,
+          referralCode: data?.referralCode,
+          referralCount:
+            data?.referralCount ?? data?.referrals ?? 0,
+        });
       } catch {
         // ignore
       } finally {
@@ -35,6 +44,26 @@ export default function Account() {
 
     if (userId) run();
   }, [userId, updateUser]);
+
+  const referralCount =
+    serverUser?.referralCount ??
+    serverUser?.referrals ??
+    user?.referralCount ??
+    0;
+
+  const copyCode = useCallback(async () => {
+    const code = serverUser?.referralCode || user?.referralCode || "";
+    if (!code) {
+      toast.error("No referral code yet.");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(code);
+      toast.success("Referral code copied");
+    } catch {
+      toast.error("Could not copy referral code.");
+    }
+  }, [serverUser?.referralCode, user?.referralCode]);
 
   const save = async (e) => {
     e.preventDefault();
@@ -79,6 +108,32 @@ export default function Account() {
       </div>
 
       {loading && !serverUser ? <p>Loading...</p> : null}
+
+      <div className="auth-card account-referral-card" style={{ maxWidth: 520, margin: "12px auto" }}>
+        <h3 style={{ marginTop: 0 }}>Referrals</h3>
+        <p style={{ marginTop: 0, opacity: 0.85 }}>
+          Share your code with friends. Totals refresh whenever someone registers
+          using your code.
+        </p>
+
+        <div className="account-referral-grid">
+          <div className="account-referral-stat">
+            <div className="account-referral-label">Total referrals</div>
+            <div className="account-referral-number">{referralCount}</div>
+          </div>
+          <div className="account-referral-stat">
+            <div className="account-referral-label">Your code</div>
+            <div className="account-referral-code-row">
+              <code className="account-referral-code">
+                {serverUser?.referralCode || user?.referralCode || "—"}
+              </code>
+              <button type="button" className="referral-copy-btn" onClick={copyCode}>
+                Copy
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="auth-card" style={{ maxWidth: 520, margin: "12px auto" }}>
         <h3 style={{ marginTop: 0 }}>Profile</h3>

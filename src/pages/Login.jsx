@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { useAuth } from "../auth/AuthContext";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
@@ -34,7 +35,9 @@ export default function Login() {
       setAuth({ token: data.token, user: data.user });
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err?.message || "Login failed");
+      const msg = err?.message || "Login failed";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -73,6 +76,10 @@ export default function Login() {
           <button disabled={loading} type="submit">
             {loading ? "Logging in..." : "Login"}
           </button>
+
+          <div className="auth-inline-link">
+            <Link to="/forgot-password">Forgot password?</Link>
+          </div>
         </form>
 
         <p className="auth-footer">

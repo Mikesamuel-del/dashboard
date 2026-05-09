@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Dashboard from "./components/Dashboard";
 import Ads from "./pages/Ads";
 import Writing from "./pages/Writing";
@@ -7,6 +9,8 @@ import Survey from "./pages/Survey";
 import "./styles.css";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import RequireAuth from "./auth/RequireAuth";
 import Account from "./pages/Account";
 import Wallet from "./pages/Wallet";
@@ -15,9 +19,12 @@ import History from "./pages/History";
 function App() {
   return (
     <Router>
+      <ToastContainer position="top-center" newestOnTop theme="colored" />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         <Route
           path="/"

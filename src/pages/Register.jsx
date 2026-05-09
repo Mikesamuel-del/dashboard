@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { useAuth } from "../auth/AuthContext";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
@@ -49,7 +50,9 @@ export default function Register() {
       setAuth({ token: data.token, user: data.user });
       navigate("/", { replace: true });
     } catch (err) {
-      setError(err?.message || "Registration failed");
+      const msg = err?.message || "Registration failed";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,5 @@
 import React from "react";
+import { toast } from "react-toastify";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 
@@ -48,45 +49,68 @@ const Packages = ({ user, refresh }) => {
       });
       const data = await res.json();
       if (!res.ok || data?.success === false) {
-        alert(data?.message || data?.error || "Purchase failed");
+        toast.error(data?.message || data?.error || "Purchase failed");
         return;
       }
-      alert(data?.message || "Package purchased");
+      toast.success(data?.message || "Package purchased");
       refresh?.();
     } catch (e) {
-      alert("Purchase failed");
+      toast.error("Purchase failed");
     }
   };
 
+  const current =
+    (user?.package || "none").toLowerCase();
+
   return (
-    <div className="packages">
-      {packages.map((pkg, index) => (
-        <div key={index} className="package-card">
-          <h3>{pkg.name}</h3>
-          <p className="price">KES {pkg.price}</p>
-          <p style={{ marginTop: 0, opacity: 0.85 }}>
-            Current: <b>{(user?.package || "none").toUpperCase()}</b>
-          </p>
+    <section className="packages-section" aria-labelledby="packages-heading">
+      <div className="packages-section-head">
+        <h2 id="packages-heading">Packages</h2>
+        <p className="packages-section-sub">
+          Current plan:{" "}
+          <strong>{(user?.package || "none").toUpperCase()}</strong>
+        </p>
+      </div>
 
-          {/* ✅ ADVANTAGES */}
-          <ul>
-            {pkg.advantages.map((adv, i) => (
-              <li key={i}>{adv}</li>
-            ))}
-          </ul>
+      <div className="package-cards-grid">
+        {packages.map((pkg) => {
+          const active = current === pkg.id;
+          return (
+            <article key={pkg.id} className={`package-card${active ? " is-active" : ""}`}>
+              <div className="package-card-body">
+                <header className="package-card-top">
+                  <h3 className="package-title">{pkg.name}</h3>
+                  <p className="package-price">
+                    <span className="package-price-label">KES</span>
+                    <span className="package-price-value">{pkg.price}</span>
+                  </p>
+                  {active ? (
+                    <span className="package-badge">Active</span>
+                  ) : null}
+                </header>
 
-          <button
-            className="buy-btn"
-            disabled={(user?.package || "none").toLowerCase() === pkg.id}
-            onClick={() => buy(pkg.id)}
-          >
-            {(user?.package || "none").toLowerCase() === pkg.id
-              ? "Active"
-              : "Buy"}
-          </button>
-        </div>
-      ))}
-    </div>
+                <ul className="package-features">
+                  {pkg.advantages.map((adv, i) => (
+                    <li key={i}>{adv}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="package-card-actions">
+                <button
+                  type="button"
+                  className="buy-btn"
+                  disabled={active}
+                  onClick={() => buy(pkg.id)}
+                >
+                  {active ? "Active plan" : `Buy ${pkg.name}`}
+                </button>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
   );
 };
 

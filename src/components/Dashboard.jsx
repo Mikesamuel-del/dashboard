@@ -30,6 +30,9 @@ const Dashboard = () => {
       updateUser({
         balance: data.balance,
         package: data.package,
+        referralCode: data.referralCode,
+        referralCount:
+          data.referralCount ?? data.referrals ?? 0,
       });
     } catch (err) {
       console.log("Fetch user error:", err);
@@ -203,7 +206,12 @@ const Dashboard = () => {
 
       {/* MIDDLE */}
       <div className="middle-section">
-        <ReferralBox referralCode={user.referralCode} />
+        <ReferralBox
+          referralCode={user.referralCode}
+          referralCount={
+            user.referralCount ?? user.referrals ?? 0
+          }
+        />
         <Packages user={user} refresh={fetchUser} />
       </div>
 
