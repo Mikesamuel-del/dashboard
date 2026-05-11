@@ -14,6 +14,7 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [referredBy, setReferredBy] = useState(() => {
     try {
       const params = new URLSearchParams(location.search);
@@ -22,6 +23,7 @@ export default function Register() {
       return "";
     }
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -29,6 +31,7 @@ export default function Register() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     try {
       const res = await fetch(`${API_BASE}/api/user/register`, {
         method: "POST",
@@ -41,12 +44,13 @@ export default function Register() {
           referredBy: referredBy || undefined,
         }),
       });
+
       const data = await res.json();
+
       if (!res.ok || !data?.success) {
         throw new Error(data?.message || "Registration failed");
       }
 
-      // Register returns token + sanitized user
       setAuth({ token: data.token, user: data.user });
       navigate("/", { replace: true });
     } catch (err) {
@@ -99,13 +103,40 @@ export default function Register() {
 
           <label>
             Password
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              type="password"
-              placeholder="Create a password"
-              required
-            />
+            <div style={{ position: "relative" }}>
+              <input
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type={showPassword ? "text" : "password"}
+                placeholder="Create a password"
+                required
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  paddingRight: "45px",
+                }}
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "10px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  fontSize: "20px",
+                  padding: 0,
+                  lineHeight: 1,
+                }}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
           </label>
 
           <label>
@@ -129,4 +160,3 @@ export default function Register() {
     </div>
   );
 }
-
