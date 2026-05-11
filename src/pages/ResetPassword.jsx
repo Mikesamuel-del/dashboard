@@ -1,3 +1,4 @@
+// Replace your ResetPassword.jsx with this version
 import React, { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -9,7 +10,10 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -18,6 +22,15 @@ export default function ResetPassword() {
     e.preventDefault();
     setError("");
     setMessage("");
+
+    // Check if passwords match before sending to backend
+    if (password !== confirmPassword) {
+      const msg = "Passwords do not match.";
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -44,6 +57,11 @@ export default function ResetPassword() {
       setMessage(successMessage);
       toast.success(successMessage);
 
+      // Clear fields
+      setPassword("");
+      setConfirmPassword("");
+
+      // Redirect to login after 2 seconds
       setTimeout(() => {
         navigate("/login");
       }, 2000);
@@ -56,6 +74,25 @@ export default function ResetPassword() {
     }
   };
 
+  const passwordInputStyle = {
+    width: "100%",
+    boxSizing: "border-box",
+    paddingRight: "45px",
+  };
+
+  const eyeButtonStyle = {
+    position: "absolute",
+    right: "10px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    fontSize: "20px",
+    padding: 0,
+    lineHeight: 1,
+  };
+
   return (
     <div className="auth-container">
       <div className="auth-card">
@@ -65,6 +102,7 @@ export default function ResetPassword() {
         {message ? <div className="auth-success">{message}</div> : null}
 
         <form onSubmit={submit} className="auth-form">
+          {/* New Password */}
           <label>
             New Password
             <div style={{ position: "relative" }}>
@@ -74,33 +112,48 @@ export default function ResetPassword() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your new password"
                 required
-                style={{
-                  width: "100%",
-                  boxSizing: "border-box",
-                  paddingRight: "45px",
-                }}
+                style={passwordInputStyle}
               />
 
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer",
-                  fontSize: "20px",
-                  padding: 0,
-                  lineHeight: 1,
-                }}
+                style={eyeButtonStyle}
                 aria-label={
                   showPassword ? "Hide password" : "Show password"
                 }
               >
                 {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
+          </label>
+
+          {/* Confirm New Password */}
+          <label>
+            Confirm New Password
+            <div style={{ position: "relative" }}>
+              <input
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm your new password"
+                required
+                style={passwordInputStyle}
+              />
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowConfirmPassword(!showConfirmPassword)
+                }
+                style={eyeButtonStyle}
+                aria-label={
+                  showConfirmPassword
+                    ? "Hide password"
+                    : "Show password"
+                }
+              >
+                {showConfirmPassword ? "🙈" : "👁️"}
               </button>
             </div>
           </label>
