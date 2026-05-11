@@ -1,57 +1,43 @@
 import React, { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useAuth } from "../auth/AuthContext";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 
-export default function ResetPassword() {
-  const { token } = useParams();
-  const navigate = useNavigate();
-  const { setAuth } = useAuth();
-
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+export default function ForgotPassword() {
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const submit = async (e) => {
     e.preventDefault();
-
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
-    }
-
+    setError("");
+    setMessage("");
     setLoading(true);
+
     try {
-      const res = await fetch(
-        `${API_BASE}/api/user/reset-password/${encodeURIComponent(token)}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password, confirmPassword }),
-        }
-      );
-      const data = await res.json().catch(() => ({}));
+      const res = await fetch(`${API_BASE}/api/user/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
 
       if (!res.ok || !data?.success) {
-        throw new Error(data?.message || "Reset failed");
+        throw new Error(data?.message || "Failed to send reset link");
       }
 
-      toast.success(data.message || "Password updated");
+      const successMessage =
+        data?.message || "Password reset link sent to your email.";
 
-      if (data.token && data.user) {
-        setAuth({ token: data.token, user: data.user });
-      }
-
-      navigate("/", { replace: true });
+      setMessage(successMessage);
+      toast.success(successMessage);
     } catch (err) {
-      toast.error(err?.message || "Reset failed");
+      const msg = err?.message || "Failed to send reset link";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -60,49 +46,30 @@ export default function ResetPassword() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>Set a new password</h2>
-        <p style={{ marginTop: 0, color: "#475569", fontSize: 14 }}>
-          Choose a strong password you haven&apos;t used elsewhere.
-        </p>
+        <h2>Forgot Password</h2>
 
-        {!token ? (
-          <div className="auth-error">Missing reset token in URL.</div>
-        ) : null}
+        {error ? <div className="auth-error">{error}</div> : null}
+        {message ? <div className="auth-success">{message}</div> : null}
 
         <form onSubmit={submit} className="auth-form">
           <label>
-            New password
+            Email Address
             <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              type="password"
-              placeholder="At least 8 characters"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              placeholder="you@email.com"
               required
-              minLength={8}
-              autoComplete="new-password"
             />
           </label>
 
-          <label>
-            Confirm password
-            <input
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              type="password"
-              placeholder="Repeat password"
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
-          </label>
-
-          <button disabled={loading || !token} type="submit">
-            {loading ? "Updating..." : "Update password"}
+          <button disabled={loading} type="submit">
+            {loading ? "Sending reset link..." : "Send Reset Link"}
           </button>
         </form>
 
         <p className="auth-footer">
-          <Link to="/login">Back to login</Link>
+          Remembered your password? <Link to="/login">Login</Link>
         </p>
       </div>
     </div>
