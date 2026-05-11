@@ -12,7 +12,7 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -77,6 +77,7 @@ export default function Login() {
                 required
                 style={{
                   width: "100%",
+                  boxSizing: "border-box",
                   paddingRight: "45px",
                 }}
               />
@@ -94,10 +95,9 @@ export default function Login() {
                   cursor: "pointer",
                   fontSize: "20px",
                   padding: 0,
+                  lineHeight: 1,
                 }}
-                aria-label={
-                  showPassword ? "Hide password" : "Show password"
-                }
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? "🙈" : "👁️"}
               </button>
