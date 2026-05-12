@@ -3,6 +3,8 @@ import EarningsCard from "./EarningsCard";
 import ReferralBox from "./ReferralBox";
 import ActionButtons from "./ActionButtons";
 import Packages from "./Packages";
+import Logo from "./Logo";
+import LoadingSplash from "./LoadingSplash";
 import { useAuth } from "../auth/AuthContext";
 import { Link } from "react-router-dom";
 
@@ -31,8 +33,7 @@ const Dashboard = () => {
         balance: data.balance,
         package: data.package,
         referralCode: data.referralCode,
-        referralCount:
-          data.referralCount ?? data.referrals ?? 0,
+        referralCount: data.referralCount ?? data.referrals ?? 0,
       });
     } catch (err) {
       console.log("Fetch user error:", err);
@@ -46,22 +47,17 @@ const Dashboard = () => {
   // ✅ HANDLE DEPOSIT (STK PUSH)
   const handleDeposit = async () => {
     if (!amount) return;
-
     try {
       await fetch(`${API_BASE}/api/payment/deposit`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: Number(amount),
           phone: user?.phone || authedUser?.phone,
           userId,
         }),
       });
-
       alert("STK Push sent. Enter PIN on your phone.");
-
       setAmount("");
       setShowDeposit(false);
     } catch (err) {
@@ -70,33 +66,43 @@ const Dashboard = () => {
     }
   };
 
-  // ✅ HANDLE WITHDRAW (BASIC FOR NOW)
+  // ✅ HANDLE WITHDRAW
   const handleWithdraw = async () => {
     if (!amount || amount <= 0) return;
-
     try {
       const res = await fetch(`${API_BASE}/api/user/withdraw`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, amount: Number(amount) }),
       });
-
       const data = await res.json();
-
       alert(data.message || "Withdraw processed");
-
       setAmount("");
       setShowWithdraw(false);
-      fetchUser(); // 🔥 refresh balance
+      fetchUser();
     } catch (err) {
       console.log("Withdraw error:", err);
     }
   };
 
-  if (!user) return <h2>Loading...</h2>;
+  // 🟡 Branded splash while user is loading
+  if (!user) return <LoadingSplash />;
 
   return (
     <div className="container">
+      {/* BRAND BAR */}
+      <header className="mm-brandbar">
+        <Logo size="md" />
+        <nav className="mm-brandbar-nav">
+          <Link to="/help" className="mm-brandbar-link">
+            Help Center
+          </Link>
+          <button className="logout-btn" onClick={logout}>
+            Logout
+          </button>
+        </nav>
+      </header>
+
       {/* TOP */}
       <div className="top-bar">
         <div className="top-bar-row">
@@ -107,22 +113,13 @@ const Dashboard = () => {
               <b>{(user.package || "none").toUpperCase()}</b>
             </div>
           </div>
-
-          <button className="logout-btn" onClick={logout}>
-            Logout
-          </button>
         </div>
 
         <div className="quick-links">
-          <Link className="link-btn" to="/wallet">
-            Wallet
-          </Link>
-          <Link className="link-btn" to="/account">
-            Account
-          </Link>
-          <Link className="link-btn" to="/history">
-            History
-          </Link>
+          <Link className="link-btn" to="/wallet">Wallet</Link>
+          <Link className="link-btn" to="/account">Account</Link>
+          <Link className="link-btn" to="/history">History</Link>
+          <Link className="link-btn" to="/help">Help</Link>
         </div>
 
         <div className="earnings">
@@ -133,9 +130,7 @@ const Dashboard = () => {
 
         <div className="total">
           Total Earnings: KES{" "}
-          {(user.adsSurvey || 0) +
-            (user.writing || 0) +
-            (user.referral || 0)}
+          {(user.adsSurvey || 0) + (user.writing || 0) + (user.referral || 0)}
         </div>
 
         <div className="balance">
@@ -144,13 +139,9 @@ const Dashboard = () => {
 
         {/* WALLET BUTTONS */}
         <div className="wallet-buttons">
-          <button
-            className="deposit-btn"
-            onClick={() => setShowDeposit(true)}
-          >
+          <button className="deposit-btn" onClick={() => setShowDeposit(true)}>
             💳 Deposit (to {user.phone})
           </button>
-
           <button
             className="withdraw-btn"
             onClick={() => {
@@ -170,26 +161,17 @@ const Dashboard = () => {
       {(showDeposit || showWithdraw) && (
         <div className="modal">
           <div className="modal-content">
-            <h3>
-              {showDeposit ? "Deposit Amount" : "Withdraw Amount"}
-            </h3>
-
+            <h3>{showDeposit ? "Deposit Amount" : "Withdraw Amount"}</h3>
             <input
               type="number"
               placeholder="Enter amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
             />
-
             <div className="modal-buttons">
-              <button
-                onClick={
-                  showDeposit ? handleDeposit : handleWithdraw
-                }
-              >
+              <button onClick={showDeposit ? handleDeposit : handleWithdraw}>
                 Confirm
               </button>
-
               <button
                 className="cancel-btn"
                 onClick={() => {
@@ -208,14 +190,17 @@ const Dashboard = () => {
       <div className="middle-section">
         <ReferralBox
           referralCode={user.referralCode}
-          referralCount={
-            user.referralCount ?? user.referrals ?? 0
-          }
+          referralCount={user.referralCount ?? user.referrals ?? 0}
         />
         <Packages user={user} refresh={fetchUser} />
       </div>
 
       <ActionButtons userPackage={user.package} />
+
+      <footer className="mm-footer">
+        <Logo size="sm" />
+        <p>© {new Date().getFullYear()} Marketminds. All rights reserved.</p>
+      </footer>
     </div>
   );
 };
