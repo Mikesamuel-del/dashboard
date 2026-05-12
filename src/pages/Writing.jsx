@@ -1,441 +1,228 @@
-import React, { useEffect, useState } from "react";
-import EarningsCard from "./EarningsCard";
-import ReferralBox from "./ReferralBox";
-import ActionButtons from "./ActionButtons";
-import Packages from "./Packages";
-import Logo from "./Logo";
-import LoadingSplash from "./LoadingSplash";
-import { useAuth } from "../auth/AuthContext";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
 const API_BASE =
   process.env.REACT_APP_API_BASE ||
   "http://localhost:5000";
 
-const Dashboard = () => {
-  const {
-    user: authedUser,
-    logout,
-    updateUser,
-  } = useAuth();
+const canAccessWriting = (pkg) =>
+  (pkg || "none").toLowerCase() === "gold";
 
-  const [user, setUser] = useState(null);
+/* ===== WRITING GIGS (curated real-world style tasks) ===== */
+const WRITING_TASKS = [
+  {
+    id: 1,
+    title: "Blog Writing Task",
+    description:
+      "Write a 500-word article on 'How to start freelancing online'.",
+    reward: 50,
+    link: "https://www.upwork.com/",
+  },
+  {
+    id: 2,
+    title: "Product Review Writing",
+    description:
+      "Write a review for a smartphone or digital product.",
+    reward: 40,
+    link: "https://www.fiverr.com/",
+  },
+  {
+    id: 3,
+    title: "Social Media Content Writing",
+    description:
+      "Create 10 short captions for Instagram marketing.",
+    reward: 30,
+    link: "https://www.freelancer.com/",
+  },
+  {
+    id: 4,
+    title: "SEO Article Writing",
+    description:
+      "Write SEO optimized article for a business website.",
+    reward: 60,
+    link: "https://www.peopleperhour.com/",
+  },
+];
 
-  const [showDeposit, setShowDeposit] =
-    useState(false);
+export default function Writing() {
+  const { user, updateUser } = useAuth();
 
-  const [showWithdraw, setShowWithdraw] =
-    useState(false);
+  const [completed, setCompleted] = useState([]);
+  const [loadingId, setLoadingId] = useState(null);
 
-  const [amount, setAmount] =
-    useState("");
+  if (!canAccessWriting(user?.package)) {
+    return (
+      <div className="container">
+        <h2>Upgrade Required</h2>
+        <p>
+          Online Writing is available on the Gold package only.
+        </p>
+        <Link to="/">← Back to Dashboard</Link>
+      </div>
+    );
+  }
 
-  const userId = authedUser?.id;
+  const completeTask = async (task) => {
+    if (completed.includes(task.id)) {
+      alert("Task already completed.");
+      return;
+    }
 
-  const fetchUser = async () => {
+    setLoadingId(task.id);
+
     try {
-      if (!userId) return;
+      // OPTIONAL backend reward tracking
+      await fetch(
+        `${API_BASE}/api/user/writing-reward`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            userId: user?.id,
+            reward: task.reward,
+          }),
+        }
+      ).catch(() => {});
 
-      const res = await fetch(
-        `${API_BASE}/api/user/${userId}`
-      );
-
-      const data = await res.json();
-
-      setUser(data);
+      const newBalance =
+        Number(user?.balance || 0) +
+        task.reward;
 
       updateUser({
-        balance: data.balance,
-        package: data.package,
-        referralCode:
-          data.referralCode,
-        referralCount:
-          data.referralCount ??
-          data.referrals ??
-          0,
+        balance: newBalance,
       });
-    } catch (err) {
-      console.log("Fetch user error:", err);
-    }
-  };
 
-  useEffect(() => {
-    fetchUser();
-  }, [userId]);
-
-  const handleDeposit = async () => {
-    if (!amount) return;
-
-    try {
-      await fetch(
-        `${API_BASE}/api/payment/deposit`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            amount: Number(amount),
-            phone:
-              user?.phone ||
-              authedUser?.phone,
-            userId,
-          }),
-        }
-      );
+      setCompleted((prev) => [
+        ...prev,
+        task.id,
+      ]);
 
       alert(
-        "STK Push sent. Enter PIN on your phone."
+        `You earned KES ${task.reward}`
       );
-
-      setAmount("");
-      setShowDeposit(false);
     } catch (err) {
-      console.log("Deposit error:", err);
-      alert("Deposit failed");
+      console.log(err);
+      alert("Failed to complete task");
+    } finally {
+      setLoadingId(null);
     }
   };
-
-  const handleWithdraw = async () => {
-    if (!amount || amount <= 0) return;
-
-    try {
-      const res = await fetch(
-        `${API_BASE}/api/user/withdraw`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            userId,
-            amount: Number(amount),
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      alert(
-        data.message ||
-          "Withdraw processed"
-      );
-
-      setAmount("");
-      setShowWithdraw(false);
-
-      fetchUser();
-    } catch (err) {
-      console.log("Withdraw error:", err);
-    }
-  };
-
-  if (!user) return <LoadingSplash />;
-
-  /* ===== SMART NOTIFICATIONS ===== */
-
-  const notifications = [];
-
-  if ((user?.balance || 0) <= 0) {
-    notifications.push({
-      type: "warning",
-      message:
-        "Your account balance is zero. Deposit funds to continue earning.",
-      action: "Deposit Now",
-      link: "/wallet",
-    });
-  }
-
-  if (
-    !user?.package ||
-    user?.package === "none"
-  ) {
-    notifications.push({
-      type: "danger",
-      message:
-        "You do not have an active package. Buy one to unlock earnings and withdrawals.",
-      action: "Buy Package",
-      link: "/packages",
-    });
-  }
-
-  if (user?.package === "bronze") {
-    notifications.push({
-      type: "info",
-      message:
-        "Upgrade to Silver package for higher withdrawal limits and better rewards.",
-      action: "Upgrade Now",
-      link: "/packages",
-    });
-  }
-
-  if (user?.package === "silver") {
-    notifications.push({
-      type: "success",
-      message:
-        "Upgrade to Gold package to enjoy full access and maximum referral benefits.",
-      action: "Go Gold",
-      link: "/packages",
-    });
-  }
 
   return (
-    <div className="container">
-      {/* ===== BRAND HERO ===== */}
-      <header className="mm-brand-hero">
-        <div className="mm-brand-hero-row">
-          <img
-            src={require("../assets/marketminds-logo.png")}
-            alt="Marketminds"
-            className="mm-brand-hero-logo"
-          />
+    <div
+      className="container"
+      style={{
+        padding: "16px",
+        maxWidth: "800px",
+        margin: "0 auto",
+      }}
+    >
+      <Link to="/">← Back to Dashboard</Link>
 
-          <nav className="mm-brand-hero-nav">
-            <Link
-              to="/help"
-              className="mm-brandbar-link"
-            >
-              Help Center
-            </Link>
+      <h1 style={{ marginTop: "10px" }}>
+        Online Writing Jobs
+      </h1>
 
-            <button
-              className="logout-btn"
-              onClick={logout}
-            >
-              Logout
-            </button>
-          </nav>
-        </div>
+      <p style={{ opacity: 0.8 }}>
+        Complete writing tasks and earn KES rewards.
+      </p>
 
-        <div className="mm-brand-hero-wordmark">
-          Market<span>minds</span>
-        </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+          marginTop: "20px",
+        }}
+      >
+        {WRITING_TASKS.map((task) => {
+          const isDone =
+            completed.includes(task.id);
 
-        <p className="mm-brand-hero-tagline">
-          Smart investments. Steady growth.
-        </p>
-      </header>
-
-      {/* ===== SMART ALERTS (FIXED - NO KES DUPLICATION) ===== */}
-      {notifications.length > 0 && (
-        <div
-          className="dashboard-alerts"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "14px",
-            marginBottom: "20px",
-          }}
-        >
-          {notifications.map((note, index) => (
+          return (
             <div
-              key={index}
+              key={task.id}
               style={{
                 padding: "16px",
                 borderRadius: "14px",
-                display: "flex",
-                justifyContent:
-                  "space-between",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: "12px",
-                color: "#fff",
                 background:
-                  note.type === "warning"
-                    ? "#f59e0b"
-                    : note.type === "danger"
-                    ? "#dc2626"
-                    : note.type === "success"
-                    ? "#16a34a"
-                    : "#2563eb",
+                  "rgba(255,255,255,0.05)",
+                border:
+                  "1px solid rgba(255,255,255,0.08)",
               }}
             >
+              <h3>{task.title}</h3>
+
+              <p style={{ opacity: 0.8 }}>
+                {task.description}
+              </p>
+
+              <p>
+                Reward:{" "}
+                <b>KES {task.reward}</b>
+              </p>
+
               <div
                 style={{
-                  flex: 1,
-                  minWidth: "220px",
-                  lineHeight: "1.5",
+                  display: "flex",
+                  gap: "10px",
+                  marginTop: "10px",
+                  flexWrap: "wrap",
                 }}
               >
-                {note.message}
+                <a
+                  href={task.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    padding: "10px 14px",
+                    background:
+                      "#6b7280",
+                    color: "#fff",
+                    borderRadius:
+                      "10px",
+                    textDecoration:
+                      "none",
+                  }}
+                >
+                  Open Platform
+                </a>
+
+                <button
+                  onClick={() =>
+                    completeTask(task)
+                  }
+                  disabled={
+                    isDone ||
+                    loadingId === task.id
+                  }
+                  style={{
+                    padding: "10px 14px",
+                    background: isDone
+                      ? "#555"
+                      : "#16a34a",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius:
+                      "10px",
+                    cursor: "pointer",
+                  }}
+                >
+                  {loadingId === task.id
+                    ? "Processing..."
+                    : isDone
+                    ? "Completed"
+                    : "Claim Reward"}
+                </button>
               </div>
-
-              <Link
-                to={note.link}
-                style={{
-                  background:
-                    "#ffffff",
-                  color: "#111827",
-                  padding:
-                    "10px 16px",
-                  borderRadius:
-                    "10px",
-                  textDecoration:
-                    "none",
-                  fontWeight: "600",
-                  whiteSpace:
-                    "nowrap",
-                }}
-              >
-                {note.action}
-              </Link>
             </div>
-          ))}
-        </div>
-      )}
-
-      {/* ===== TOP BAR ===== */}
-      <div className="top-bar">
-        <div className="top-bar-row">
-          <div>
-            <h2>Account Balance</h2>
-            <div className="top-sub">
-              {user.name} • {user.email} • Package:{" "}
-              <b>
-                {(
-                  user.package ||
-                  "none"
-                ).toUpperCase()}
-              </b>
-            </div>
-          </div>
-        </div>
-
-        <div className="quick-links">
-          <Link
-            className="link-btn"
-            to="/wallet"
-          >
-            Wallet
-          </Link>
-
-          <Link
-            className="link-btn"
-            to="/account"
-          >
-            Account
-          </Link>
-        </div>
-
-        {/* ONLY BALANCE HERE */}
-        <div className="balance">
-          KES {user.balance ?? 0}
-        </div>
-
-        <ActionButtons
-          onDepositClick={() =>
-            setShowDeposit(true)
-          }
-          onWithdrawClick={() =>
-            setShowWithdraw(true)
-          }
-        />
+          );
+        })}
       </div>
-
-      {/* ===== MODALS ===== */}
-      {showDeposit && (
-        <div className="modal">
-          <div className="modal-card">
-            <h3>Deposit via M-Pesa</h3>
-            <input
-              type="number"
-              placeholder="Amount (KES)"
-              value={amount}
-              onChange={(e) =>
-                setAmount(
-                  e.target.value
-                )
-              }
-            />
-            <div className="modal-actions">
-              <button
-                className="confirm"
-                onClick={handleDeposit}
-              >
-                Confirm
-              </button>
-              <button
-                className="cancel"
-                onClick={() =>
-                  setShowDeposit(false)
-                }
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showWithdraw && (
-        <div className="modal">
-          <div className="modal-card">
-            <h3>Withdraw Funds</h3>
-            <input
-              type="number"
-              placeholder="Amount (KES)"
-              value={amount}
-              onChange={(e) =>
-                setAmount(
-                  e.target.value
-                )
-              }
-            />
-            <div className="modal-actions">
-              <button
-                className="confirm"
-                onClick={handleWithdraw}
-              >
-                Confirm
-              </button>
-              <button
-                className="cancel"
-                onClick={() =>
-                  setShowWithdraw(false)
-                }
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ===== COMPONENTS ===== */}
-      <EarningsCard
-        balance={user.balance ?? 0}
-      />
-
-      <ReferralBox
-        referralCode={
-          user.referralCode
-        }
-        referrals={
-          user.referralCount ?? 0
-        }
-      />
-
-      <Packages
-        userId={userId}
-        currentPackage={
-          user.package
-        }
-        onPurchased={fetchUser}
-      />
-
-      {/* ===== FOOTER ===== */}
-      <footer className="mm-footer">
-        <Logo size="sm" />
-        <span>
-          ©{" "}
-          {new Date().getFullYear()}{" "}
-          Marketminds. All rights reserved.
-        </span>
-      </footer>
     </div>
   );
-};
-
-export default Dashboard;
+}
