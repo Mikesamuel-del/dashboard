@@ -17,11 +17,15 @@ export default function Wallet() {
   useEffect(() => {
     const fetchUser = async () => {
       if (!userId) return;
+
       setLoading(true);
+
       try {
         const res = await fetch(`${API_BASE}/api/user/${userId}`);
         const data = await res.json();
+
         setServerUser(data);
+
         updateUser({
           balance: data.balance,
           package: data.package,
@@ -38,16 +42,20 @@ export default function Wallet() {
 
   const deposit = async () => {
     if (!amount) return;
+
     try {
       await fetch(`${API_BASE}/api/payment/deposit`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           amount: Number(amount),
           phone: serverUser?.phone || user?.phone,
           userId,
         }),
       });
+
       alert("STK Push sent. Enter PIN on your phone.");
       setAmount("");
     } catch {
@@ -57,6 +65,7 @@ export default function Wallet() {
 
   const withdraw = async () => {
     if (!amount) return;
+
     if (!hasActivePackage(serverUser?.package || user?.package)) {
       alert("Buy a package first to withdraw.");
       return;
@@ -65,17 +74,30 @@ export default function Wallet() {
     try {
       const res = await fetch(`${API_BASE}/api/user/withdraw`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, amount: Number(amount) }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          amount: Number(amount),
+        }),
       });
+
       const data = await res.json();
+
       alert(data?.message || "Withdraw processed");
+
       setAmount("");
-      // refresh balance
+
       try {
-        const refreshRes = await fetch(`${API_BASE}/api/user/${userId}`);
+        const refreshRes = await fetch(
+          `${API_BASE}/api/user/${userId}`
+        );
+
         const refreshData = await refreshRes.json();
+
         setServerUser(refreshData);
+
         updateUser({
           balance: refreshData.balance,
           package: refreshData.package,
@@ -91,19 +113,75 @@ export default function Wallet() {
   };
 
   return (
-    <div className="container">
-      <div className="page-header">
+    <div
+      className="container"
+      style={{
+        padding: "14px",
+        maxWidth: "100%",
+        overflowX: "hidden",
+      }}
+    >
+      <div
+        className="page-header"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "14px",
+          alignItems: "stretch",
+        }}
+      >
         <div>
-          <h2>Wallet</h2>
-          <div className="page-sub">
-            Balance: <b>KES {user?.balance ?? 0}</b> • Phone: <b>{user?.phone || "-"}</b>
+          <h2
+            style={{
+              marginBottom: "6px",
+              fontSize: "1.5rem",
+            }}
+          >
+            Wallet
+          </h2>
+
+          <div
+            className="page-sub"
+            style={{
+              fontSize: "14px",
+              lineHeight: "1.6",
+              wordBreak: "break-word",
+            }}
+          >
+            Balance: <b>KES {user?.balance ?? 0}</b>
+            <br />
+            Phone: <b>{user?.phone || "-"}</b>
           </div>
         </div>
-        <div className="page-actions">
-          <Link className="link-btn" to="/">
+
+        <div
+          className="page-actions"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            width: "100%",
+          }}
+        >
+          <Link
+            className="link-btn"
+            to="/"
+            style={{
+              width: "100%",
+              textAlign: "center",
+            }}
+          >
             Dashboard
           </Link>
-          <Link className="link-btn" to="/account">
+
+          <Link
+            className="link-btn"
+            to="/account"
+            style={{
+              width: "100%",
+              textAlign: "center",
+            }}
+          >
             Account
           </Link>
         </div>
@@ -111,28 +189,71 @@ export default function Wallet() {
 
       {loading && !serverUser ? <p>Loading...</p> : null}
 
-      <div className="auth-card" style={{ maxWidth: 520, margin: "12px auto" }}>
-        <h3 style={{ marginTop: 0 }}>Deposit / Withdraw</h3>
-        <p style={{ marginTop: 0, opacity: 0.85 }}>
-          Deposits go to the registered phone number. Withdrawals require an active package.
+      <div
+        className="auth-card"
+        style={{
+          width: "100%",
+          maxWidth: "100%",
+          margin: "14px auto",
+          padding: "18px",
+          boxSizing: "border-box",
+        }}
+      >
+        <h3 style={{ marginTop: 0 }}>
+          Deposit / Withdraw
+        </h3>
+
+        <p
+          style={{
+            marginTop: 0,
+            opacity: 0.85,
+            lineHeight: "1.6",
+            fontSize: "14px",
+          }}
+        >
+          Deposits go to the registered phone number.
+          Withdrawals require an active package.
         </p>
 
-        <div className="auth-form">
+        <div
+          className="auth-form"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "14px",
+          }}
+        >
           <label>
             Amount (KES)
+
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Enter amount"
               min="1"
+              style={{ width: "100%" }}
             />
           </label>
 
-          <button type="button" onClick={deposit}>
+          <button
+            type="button"
+            onClick={deposit}
+            style={{
+              width: "100%",
+            }}
+          >
             Deposit (STK Push)
           </button>
-          <button type="button" onClick={withdraw} style={{ background: "#e53935" }}>
+
+          <button
+            type="button"
+            onClick={withdraw}
+            style={{
+              background: "#e53935",
+              width: "100%",
+            }}
+          >
             Withdraw
           </button>
         </div>
@@ -140,4 +261,3 @@ export default function Wallet() {
     </div>
   );
 }
-
