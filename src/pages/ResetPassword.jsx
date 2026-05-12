@@ -1,32 +1,50 @@
 import React, { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
+
 import { toast } from "react-toastify";
 import { useAuth } from "../auth/AuthContext";
 import Logo from "../components/Logo";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+const API_BASE =
+  process.env.REACT_APP_API_BASE ||
+  "http://localhost:5000";
 
 export default function ResetPassword() {
   const { token } = useParams();
+
   const navigate = useNavigate();
+
   const { setAuth } = useAuth();
 
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [password, setPassword] =
+    useState("");
 
-  const [showPassword, setShowPassword] =
+  const [confirmPassword,
+    setConfirmPassword] =
+    useState("");
+
+  const [showPassword,
+    setShowPassword] =
     useState(false);
 
-  const [showConfirmPassword, setShowConfirmPassword] =
+  const [showConfirmPassword,
+    setShowConfirmPassword] =
     useState(false);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      return toast.error("Passwords do not match");
+      return toast.error(
+        "Passwords do not match"
+      );
     }
 
     if (password.length < 8) {
@@ -45,7 +63,8 @@ export default function ResetPassword() {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
           body: JSON.stringify({
             password,
@@ -54,13 +73,19 @@ export default function ResetPassword() {
         }
       );
 
-      const data = await res.json().catch(() => ({}));
+      const data = await res.json();
 
       if (!res.ok || !data?.success) {
-        throw new Error(data?.message || "Reset failed");
+        throw new Error(
+          data?.message ||
+            "Reset failed"
+        );
       }
 
-      toast.success(data.message || "Password updated");
+      toast.success(
+        data.message ||
+          "Password updated"
+      );
 
       if (data.token && data.user) {
         setAuth({
@@ -69,9 +94,13 @@ export default function ResetPassword() {
         });
       }
 
-      navigate("/", { replace: true });
+      navigate("/", {
+        replace: true,
+      });
     } catch (err) {
-      toast.error(err?.message || "Reset failed");
+      toast.error(
+        err?.message || "Reset failed"
+      );
     } finally {
       setLoading(false);
     }
@@ -79,28 +108,25 @@ export default function ResetPassword() {
 
   return (
     <div className="mm-auth-shell">
-      <div className="mm-auth-card">
+      <div
+        className="mm-auth-card"
+        style={{
+          width: "100%",
+          maxWidth: "420px",
+          boxSizing: "border-box",
+        }}
+      >
         <div className="mm-auth-brand">
           <Logo size="lg" />
+
           <p className="mm-auth-tagline">
-            Set a new Marketminds password
+            Set a new password
           </p>
         </div>
 
         <h2 className="mm-auth-title">
-          New password
+          Reset Password
         </h2>
-
-        <p className="mm-auth-sub">
-          Choose a strong password you haven&apos;t
-          used elsewhere.
-        </p>
-
-        {!token ? (
-          <div className="auth-error">
-            Missing reset token in URL.
-          </div>
-        ) : null}
 
         <form
           onSubmit={submit}
@@ -120,32 +146,41 @@ export default function ResetPassword() {
                 onChange={(e) =>
                   setPassword(e.target.value)
                 }
-                type={showPassword ? "text" : "password"}
-                placeholder="At least 8 characters"
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
                 required
                 minLength={8}
-                autoComplete="new-password"
+                placeholder="At least 8 characters"
                 style={{
                   width: "100%",
-                  paddingRight: "45px",
+                  paddingRight: "50px",
+                  boxSizing: "border-box",
                 }}
               />
 
               <span
                 onClick={() =>
-                  setShowPassword(!showPassword)
+                  setShowPassword(
+                    !showPassword
+                  )
                 }
                 style={{
                   position: "absolute",
-                  right: "14px",
+                  right: "15px",
                   top: "50%",
-                  transform: "translateY(-50%)",
+                  transform:
+                    "translateY(-50%)",
                   cursor: "pointer",
-                  fontSize: "18px",
+                  fontSize: "20px",
                   userSelect: "none",
                 }}
               >
-                {showPassword ? "🙈" : "👁️"}
+                {showPassword
+                  ? "🙈"
+                  : "👁️"}
               </span>
             </div>
           </label>
@@ -162,20 +197,22 @@ export default function ResetPassword() {
               <input
                 value={confirmPassword}
                 onChange={(e) =>
-                  setConfirmPassword(e.target.value)
+                  setConfirmPassword(
+                    e.target.value
+                  )
                 }
                 type={
                   showConfirmPassword
                     ? "text"
                     : "password"
                 }
-                placeholder="Repeat password"
                 required
                 minLength={8}
-                autoComplete="new-password"
+                placeholder="Repeat password"
                 style={{
                   width: "100%",
-                  paddingRight: "45px",
+                  paddingRight: "50px",
+                  boxSizing: "border-box",
                 }}
               />
 
@@ -187,15 +224,18 @@ export default function ResetPassword() {
                 }
                 style={{
                   position: "absolute",
-                  right: "14px",
+                  right: "15px",
                   top: "50%",
-                  transform: "translateY(-50%)",
+                  transform:
+                    "translateY(-50%)",
                   cursor: "pointer",
-                  fontSize: "18px",
+                  fontSize: "20px",
                   userSelect: "none",
                 }}
               >
-                {showConfirmPassword ? "🙈" : "👁️"}
+                {showConfirmPassword
+                  ? "🙈"
+                  : "👁️"}
               </span>
             </div>
           </label>
@@ -205,13 +245,15 @@ export default function ResetPassword() {
             type="submit"
             className="mm-auth-btn"
           >
-            {loading ? "Saving..." : "Update password"}
+            {loading
+              ? "Saving..."
+              : "Update Password"}
           </button>
         </form>
 
         <p className="mm-auth-footer">
           <Link to="/login">
-            Back to login
+            Back to Login
           </Link>
         </p>
       </div>
