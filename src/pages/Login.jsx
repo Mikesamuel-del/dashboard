@@ -4,7 +4,9 @@ import { toast } from "react-toastify";
 import { useAuth } from "../auth/AuthContext";
 import Logo from "../components/Logo";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+const API_BASE =
+  process.env.REACT_APP_API_BASE ||
+  "http://localhost:5000";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -13,12 +15,15 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+
+  const [showPassword, setShowPassword] =
+    useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const from = location.state?.from?.pathname || "/";
+  const from =
+    location.state?.from?.pathname || "/";
 
   const submit = async (e) => {
     e.preventDefault();
@@ -27,21 +32,26 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/user/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+      const res = await fetch(
+        `${API_BASE}/api/user/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
 
       const data = await res.json();
 
       if (!res.ok || !data?.success) {
-        throw new Error(data?.message || "Login failed");
+        throw new Error(
+          data?.message || "Login failed"
+        );
       }
 
       setAuth({
@@ -51,7 +61,9 @@ export default function Login() {
 
       navigate(from, { replace: true });
     } catch (err) {
-      const msg = err?.message || "Login failed";
+      const msg =
+        err?.message || "Login failed";
+
       setError(msg);
       toast.error(msg);
     } finally {
@@ -61,30 +73,51 @@ export default function Login() {
 
   return (
     <div className="mm-auth-shell">
-      <div className="mm-auth-card">
+      <div
+        className="mm-auth-card"
+        style={{
+          width: "100%",
+          maxWidth: "420px",
+          boxSizing: "border-box",
+        }}
+      >
         <div className="mm-auth-brand">
           <Logo size="lg" />
+
           <p className="mm-auth-tagline">
             Welcome back to Marketminds
           </p>
         </div>
 
-        <h2 className="mm-auth-title">Login</h2>
+        <h2 className="mm-auth-title">
+          Login
+        </h2>
 
         {error ? (
-          <div className="auth-error">{error}</div>
+          <div className="auth-error">
+            {error}
+          </div>
         ) : null}
 
-        <form onSubmit={submit} className="mm-auth-form">
+        <form
+          onSubmit={submit}
+          className="mm-auth-form"
+        >
           <label>
             Email
 
             <input
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
               type="email"
               placeholder="you@email.com"
               required
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+              }}
             />
           </label>
 
@@ -99,31 +132,43 @@ export default function Login() {
             >
               <input
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                type={showPassword ? "text" : "password"}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
                 placeholder="Your password"
                 required
                 style={{
                   width: "100%",
-                  paddingRight: "45px",
+                  paddingRight: "50px",
+                  boxSizing: "border-box",
                 }}
               />
 
               <span
                 onClick={() =>
-                  setShowPassword(!showPassword)
+                  setShowPassword(
+                    !showPassword
+                  )
                 }
                 style={{
                   position: "absolute",
-                  right: "14px",
+                  right: "15px",
                   top: "50%",
-                  transform: "translateY(-50%)",
+                  transform:
+                    "translateY(-50%)",
                   cursor: "pointer",
-                  fontSize: "18px",
+                  fontSize: "20px",
                   userSelect: "none",
                 }}
               >
-                {showPassword ? "🙈" : "👁️"}
+                {showPassword
+                  ? "🙈"
+                  : "👁️"}
               </span>
             </div>
           </label>
@@ -133,7 +178,9 @@ export default function Login() {
             type="submit"
             className="mm-auth-btn"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading
+              ? "Logging in..."
+              : "Login"}
           </button>
 
           <div className="mm-auth-inline">
@@ -145,7 +192,9 @@ export default function Login() {
 
         <p className="mm-auth-footer">
           Don’t have an account?{" "}
-          <Link to="/register">Register</Link>
+          <Link to="/register">
+            Register
+          </Link>
         </p>
       </div>
     </div>
