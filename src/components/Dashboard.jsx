@@ -404,9 +404,10 @@ const Dashboard = () => {
       )}
 
       {/* ===== COMPONENTS ===== */}
-      <EarningsCard
-        balance={user.balance ?? 0}
-      />
+  <EarningsCard
+   title="Current Balance"
+   amount={user.balance ?? 0}
+  />
 
       <ReferralBox
         referralCode={
