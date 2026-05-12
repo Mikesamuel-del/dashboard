@@ -15,6 +15,7 @@ import RequireAuth from "./auth/RequireAuth";
 import Account from "./pages/Account";
 import Wallet from "./pages/Wallet";
 import History from "./pages/History";
+import HelpCenter from "./pages/HelpCenter";
 
 function App() {
   return (
