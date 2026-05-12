@@ -691,3 +691,339 @@ body {
   background: white;
   word-break: break-all;
 }
+/* ============================================================
+   MARKETMINDS — GOLD BRAND THEME ADD-ON
+   Append the contents of this file to the bottom of your existing
+   src/styles.css (or import it after styles.css). Pure additions —
+   it overrides a few colors so the dashboard now feels "gold".
+   ============================================================ */
+
+:root {
+  --mm-gold-50:  #fdf6dd;
+  --mm-gold-100: #f5e1a4;
+  --mm-gold-300: #e6c259;
+  --mm-gold-500: #c9a227;   /* primary gold */
+  --mm-gold-600: #a87f10;
+  --mm-gold-700: #7a5b07;
+  --mm-ink-900:  #0f1724;   /* deep navy from logo bg */
+  --mm-ink-800:  #1a2235;
+  --mm-ink-700:  #243049;
+  --mm-gold-gradient: linear-gradient(135deg, #c9a227 0%, #f3d775 50%, #a87f10 100%);
+  --mm-ink-gradient:  linear-gradient(135deg, #0f1724 0%, #243049 100%);
+}
+
+/* Page background — soft cream so gold pops */
+body { background: #f7f3e8; }
+
+/* ====== Brand bar (top of dashboard) ====== */
+.mm-brandbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  background: var(--mm-ink-gradient);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(15, 23, 36, 0.18);
+  border: 1px solid rgba(201, 162, 39, 0.35);
+}
+
+.mm-brandbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mm-brandbar-link {
+  text-decoration: none;
+  color: var(--mm-gold-100);
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(201, 162, 39, 0.45);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.mm-brandbar-link:hover {
+  background: var(--mm-gold-gradient);
+  color: var(--mm-ink-900);
+}
+
+/* ====== Logo component ====== */
+.mm-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.mm-logo-img {
+  display: block;
+  background: var(--mm-ink-900);
+  border-radius: 50%;
+  padding: 4px;
+  object-fit: contain;
+  border: 1px solid rgba(201, 162, 39, 0.5);
+}
+.mm-logo--sm .mm-logo-img { width: 32px; height: 32px; }
+.mm-logo--md .mm-logo-img { width: 48px; height: 48px; }
+.mm-logo--lg .mm-logo-img { width: 96px; height: 96px; }
+
+.mm-logo-wordmark {
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  font-size: 20px;
+  color: #fff;
+  background: var(--mm-gold-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.mm-logo--sm .mm-logo-wordmark { font-size: 15px; }
+.mm-logo--lg .mm-logo-wordmark { font-size: 28px; }
+.mm-logo-wordmark-accent { font-weight: 900; }
+
+/* ====== Loading splash ====== */
+.mm-splash {
+  position: fixed;
+  inset: 0;
+  background: var(--mm-ink-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.mm-splash-inner {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.mm-splash-logo {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 22px rgba(201, 162, 39, 0.45));
+  animation: mm-pulse 1.6s ease-in-out infinite;
+}
+@keyframes mm-pulse {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%      { transform: scale(1.06); opacity: 0.85; }
+}
+.mm-splash-bar {
+  width: 220px;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.mm-splash-bar-fill {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--mm-gold-gradient);
+  border-radius: 999px;
+  animation: mm-slide 1.4s ease-in-out infinite;
+}
+@keyframes mm-slide {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+.mm-splash-text {
+  margin: 0;
+  color: var(--mm-gold-100);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* ====== Re-skin top bar to gold/ink ====== */
+.top-bar {
+  background: var(--mm-ink-gradient) !important;
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  box-shadow: 0 10px 30px rgba(15, 23, 36, 0.18);
+}
+.top-bar h2 { color: var(--mm-gold-100); }
+.balance    { color: var(--mm-gold-300) !important; }
+
+.link-btn {
+  background: rgba(201, 162, 39, 0.18) !important;
+  border-color: rgba(201, 162, 39, 0.55) !important;
+}
+.link-btn:hover {
+  background: var(--mm-gold-gradient) !important;
+  color: var(--mm-ink-900) !important;
+}
+
+.logout-btn {
+  background: var(--mm-gold-gradient) !important;
+  border: none !important;
+  color: var(--mm-ink-900) !important;
+  font-weight: 800;
+}
+
+.deposit-btn {
+  background: var(--mm-gold-gradient) !important;
+  color: var(--mm-ink-900) !important;
+  font-weight: 800;
+}
+.withdraw-btn {
+  background: linear-gradient(135deg, #7a5b07, #c9a227) !important;
+  color: #fff !important;
+  font-weight: 800;
+}
+
+/* Card titles → gold accent */
+.card h3 { color: var(--mm-gold-600) !important; }
+
+/* Packages — gold buy button */
+.buy-btn {
+  background: var(--mm-gold-gradient) !important;
+  color: var(--mm-ink-900) !important;
+}
+.package-card.is-active {
+  border-color: var(--mm-gold-500) !important;
+  box-shadow: 0 10px 22px rgba(201, 162, 39, 0.25) !important;
+}
+.package-title { color: var(--mm-gold-700) !important; }
+.package-price { color: var(--mm-gold-600) !important; }
+
+/* ====== Footer ====== */
+.mm-footer {
+  margin-top: 30px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid rgba(201, 162, 39, 0.35);
+  color: #475569;
+  font-size: 14px;
+}
+
+/* ====== Help Center page ====== */
+.help-hero {
+  background: var(--mm-ink-gradient);
+  border-radius: 16px;
+  padding: 28px;
+  color: #fff;
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  box-shadow: 0 10px 30px rgba(15, 23, 36, 0.18);
+}
+.help-hero-brand { margin-bottom: 14px; }
+.help-hero-title {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  background: var(--mm-gold-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.help-hero-sub {
+  margin: 8px 0 18px;
+  color: var(--mm-gold-100);
+  max-width: 640px;
+}
+.help-search input {
+  width: 100%;
+  max-width: 520px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 162, 39, 0.5);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  outline: none;
+}
+.help-search input::placeholder { color: rgba(255,255,255,0.6); }
+
+.help-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 20px;
+}
+@media (max-width: 900px) {
+  .help-grid { grid-template-columns: 1fr; }
+}
+
+.help-faq-card,
+.help-contact-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(15, 23, 36, 0.08);
+  border: 1px solid #eee2bf;
+}
+.help-faq-card h2 {
+  margin: 0 0 14px;
+  color: var(--mm-gold-700);
+}
+
+.help-faq-item {
+  border: 1px solid #eee2bf;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  background: #fffdf6;
+}
+.help-faq-q {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--mm-ink-900);
+  text-align: left;
+}
+.help-faq-toggle {
+  font-size: 22px;
+  color: var(--mm-gold-600);
+  font-weight: 900;
+}
+.help-faq-a {
+  padding: 0 16px 16px;
+  color: #334155;
+  line-height: 1.55;
+}
+.help-faq-item.is-open { border-color: var(--mm-gold-500); }
+.help-empty { color: #64748b; font-style: italic; }
+
+.help-contact-card h3 {
+  margin-top: 0;
+  color: var(--mm-gold-700);
+}
+.help-contact-list {
+  list-style: none;
+  margin: 14px 0;
+  padding: 0;
+}
+.help-contact-list li {
+  padding: 10px 0;
+  border-bottom: 1px dashed #eee2bf;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.help-contact-list li:last-child { border-bottom: none; }
+.help-contact-list strong {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mm-gold-600);
+}
+.help-contact-list a { color: var(--mm-ink-900); font-weight: 700; }
+
+.help-back-btn {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--mm-gold-gradient);
+  color: var(--mm-ink-900);
+  text-decoration: none;
+  font-weight: 800;
+}
