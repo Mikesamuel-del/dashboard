@@ -1,170 +1,75 @@
-// Replace your ResetPassword.jsx with this version
 import React, { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useAuth } from "../auth/AuthContext";
+import Logo from "../components/Logo";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 
 export default function ResetPassword() {
   const { token } = useParams();
   const navigate = useNavigate();
+  const { setAuth } = useAuth();
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
   const submit = async (e) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
-
-    // Check if passwords match before sending to backend
-    if (password !== confirmPassword) {
-      const msg = "Passwords do not match.";
-      setError(msg);
-      toast.error(msg);
-      return;
-    }
+    if (password !== confirmPassword) return toast.error("Passwords do not match");
+    if (password.length < 8) return toast.error("Password must be at least 8 characters");
 
     setLoading(true);
-
     try {
       const res = await fetch(
-        `${API_BASE}/api/user/reset-password/${token}`,
+        `${API_BASE}/api/user/reset-password/${encodeURIComponent(token)}`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ password }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password, confirmPassword }),
         }
       );
-
-      const data = await res.json();
-
-      if (!res.ok || !data?.success) {
-        throw new Error(data?.message || "Failed to reset password");
-      }
-
-      const successMessage =
-        data?.message || "Password reset successfully.";
-
-      setMessage(successMessage);
-      toast.success(successMessage);
-
-      // Clear fields
-      setPassword("");
-      setConfirmPassword("");
-
-      // Redirect to login after 2 seconds
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
-    } catch (err) {
-      const msg = err?.message || "Failed to reset password";
-      setError(msg);
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const passwordInputStyle = {
-    width: "100%",
-    boxSizing: "border-box",
-    paddingRight: "45px",
-  };
-
-  const eyeButtonStyle = {
-    position: "absolute",
-    right: "10px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    border: "none",
-    background: "transparent",
-    cursor: "pointer",
-    fontSize: "20px",
-    padding: 0,
-    lineHeight: 1,
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.success) throw new Error(data?.message || "Reset failed");
+      toast.success(data.message || "Password updated");
+      if (data.token && data.user) setAuth({ token: data.token, user: data.user });
+      navigate("/", { replace: true });
+    } catch (err) { toast.error(err?.message || "Reset failed"); }
+    finally { setLoading(false); }
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h2>Reset Password</h2>
+    <div className="mm-auth-shell">
+      <div className="mm-auth-card">
+        <div className="mm-auth-brand">
+          <Logo size="lg" />
+          <p className="mm-auth-tagline">Set a new Marketminds password</p>
+        </div>
 
-        {error ? <div className="auth-error">{error}</div> : null}
-        {message ? <div className="auth-success">{message}</div> : null}
+        <h2 className="mm-auth-title">New password</h2>
+        <p className="mm-auth-sub">Choose a strong password you haven&apos;t used elsewhere.</p>
 
-        <form onSubmit={submit} className="auth-form">
-          {/* New Password */}
-          <label>
-            New Password
-            <div style={{ position: "relative" }}>
-              <input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter your new password"
-                required
-                style={passwordInputStyle}
-              />
+        {!token ? <div className="auth-error">Missing reset token in URL.</div> : null}
 
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={eyeButtonStyle}
-                aria-label={
-                  showPassword ? "Hide password" : "Show password"
-                }
-              >
-                {showPassword ? "🙈" : "👁️"}
-              </button>
-            </div>
+        <form onSubmit={submit} className="mm-auth-form">
+          <label>New password
+            <input value={password} onChange={(e) => setPassword(e.target.value)}
+              type="password" placeholder="At least 8 characters" required minLength={8}
+              autoComplete="new-password" />
           </label>
-
-          {/* Confirm New Password */}
-          <label>
-            Confirm New Password
-            <div style={{ position: "relative" }}>
-              <input
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm your new password"
-                required
-                style={passwordInputStyle}
-              />
-
-              <button
-                type="button"
-                onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
-                style={eyeButtonStyle}
-                aria-label={
-                  showConfirmPassword
-                    ? "Hide password"
-                    : "Show password"
-                }
-              >
-                {showConfirmPassword ? "🙈" : "👁️"}
-              </button>
-            </div>
+          <label>Confirm password
+            <input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+              type="password" placeholder="Repeat password" required minLength={8}
+              autoComplete="new-password" />
           </label>
-
-          <button disabled={loading} type="submit">
-            {loading ? "Resetting Password..." : "Reset Password"}
+          <button disabled={loading} type="submit" className="mm-auth-btn">
+            {loading ? "Saving..." : "Update password"}
           </button>
         </form>
 
-        <p className="auth-footer">
-          Back to <Link to="/login">Login</Link>
+        <p className="mm-auth-footer">
+          <Link to="/login">Back to login</Link>
         </p>
       </div>
     </div>
