@@ -10,8 +10,6 @@ import { Link } from "react-router-dom";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
 
-const hasActivePackage = (pkg) => Boolean(pkg && pkg !== "none");
-
 const Dashboard = () => {
   const { user: authedUser, logout, updateUser } = useAuth();
   const [user, setUser] = useState(null);
@@ -22,7 +20,6 @@ const Dashboard = () => {
 
   const userId = authedUser?.id;
 
-  // ✅ FETCH USER FROM BACKEND
   const fetchUser = async () => {
     try {
       if (!userId) return;
@@ -40,11 +37,8 @@ const Dashboard = () => {
     }
   };
 
-  useEffect(() => {
-    fetchUser();
-  }, [userId]);
+  useEffect(() => { fetchUser(); }, [userId]);
 
-  // ✅ HANDLE DEPOSIT (STK PUSH)
   const handleDeposit = async () => {
     if (!amount) return;
     try {
@@ -58,15 +52,10 @@ const Dashboard = () => {
         }),
       });
       alert("STK Push sent. Enter PIN on your phone.");
-      setAmount("");
-      setShowDeposit(false);
-    } catch (err) {
-      console.log("Deposit error:", err);
-      alert("Deposit failed");
-    }
+      setAmount(""); setShowDeposit(false);
+    } catch (err) { console.log("Deposit error:", err); alert("Deposit failed"); }
   };
 
-  // ✅ HANDLE WITHDRAW
   const handleWithdraw = async () => {
     if (!amount || amount <= 0) return;
     try {
@@ -77,30 +66,34 @@ const Dashboard = () => {
       });
       const data = await res.json();
       alert(data.message || "Withdraw processed");
-      setAmount("");
-      setShowWithdraw(false);
-      fetchUser();
-    } catch (err) {
-      console.log("Withdraw error:", err);
-    }
+      setAmount(""); setShowWithdraw(false); fetchUser();
+    } catch (err) { console.log("Withdraw error:", err); }
   };
 
-  // 🟡 Branded splash while user is loading
   if (!user) return <LoadingSplash />;
 
   return (
     <div className="container">
-      {/* BRAND BAR */}
-      <header className="mm-brandbar">
-        <Logo size="md" />
-        <nav className="mm-brandbar-nav">
-          <Link to="/help" className="mm-brandbar-link">
-            Help Center
-          </Link>
-          <button className="logout-btn" onClick={logout}>
-            Logout
-          </button>
-        </nav>
+      {/* ===== BRAND HERO (upper quarter) ===== */}
+      <header className="mm-brand-hero">
+        <div className="mm-brand-hero-row">
+          <img
+            src={require("../assets/marketminds-logo.png")}
+            alt="Marketminds"
+            className="mm-brand-hero-logo"
+          />
+          <nav className="mm-brand-hero-nav">
+            <Link to="/help" className="mm-brandbar-link">Help Center</Link>
+            <button className="logout-btn" onClick={logout}>Logout</button>
+          </nav>
+        </div>
+
+        <div className="mm-brand-hero-wordmark">
+          Market<span>minds</span>
+        </div>
+        <p className="mm-brand-hero-tagline">
+          Smart investments. Steady growth.
+        </p>
       </header>
 
       {/* TOP */}
@@ -118,88 +111,60 @@ const Dashboard = () => {
         <div className="quick-links">
           <Link className="link-btn" to="/wallet">Wallet</Link>
           <Link className="link-btn" to="/account">Account</Link>
-          <Link className="link-btn" to="/history">History</Link>
-          <Link className="link-btn" to="/help">Help</Link>
         </div>
 
-        <div className="earnings">
-          <EarningsCard title="Ads & Survey" amount={user.adsSurvey || 0} />
-          <EarningsCard title="Writing" amount={user.writing || 0} />
-          <EarningsCard title="Referral" amount={user.referral || 0} />
-        </div>
+        <div className="balance">KES {user.balance ?? 0}</div>
 
-        <div className="total">
-          Total Earnings: KES{" "}
-          {(user.adsSurvey || 0) + (user.writing || 0) + (user.referral || 0)}
-        </div>
-
-        <div className="balance">
-          Total Balance: KES {user.balance || 0}
-        </div>
-
-        {/* WALLET BUTTONS */}
-        <div className="wallet-buttons">
-          <button className="deposit-btn" onClick={() => setShowDeposit(true)}>
-            💳 Deposit (to {user.phone})
-          </button>
-          <button
-            className="withdraw-btn"
-            onClick={() => {
-              if (!hasActivePackage(user.package)) {
-                alert("Buy a package first to withdraw.");
-                return;
-              }
-              setShowWithdraw(true);
-            }}
-          >
-            💰 Withdraw
-          </button>
-        </div>
+        <ActionButtons
+          onDepositClick={() => setShowDeposit(true)}
+          onWithdrawClick={() => setShowWithdraw(true)}
+        />
       </div>
 
-      {/* MODAL */}
-      {(showDeposit || showWithdraw) && (
+      {/* DEPOSIT MODAL */}
+      {showDeposit && (
         <div className="modal">
-          <div className="modal-content">
-            <h3>{showDeposit ? "Deposit Amount" : "Withdraw Amount"}</h3>
+          <div className="modal-card">
+            <h3>Deposit via M-Pesa</h3>
             <input
-              type="number"
-              placeholder="Enter amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              type="number" placeholder="Amount (KES)"
+              value={amount} onChange={(e) => setAmount(e.target.value)}
             />
-            <div className="modal-buttons">
-              <button onClick={showDeposit ? handleDeposit : handleWithdraw}>
-                Confirm
-              </button>
-              <button
-                className="cancel-btn"
-                onClick={() => {
-                  setShowDeposit(false);
-                  setShowWithdraw(false);
-                }}
-              >
-                Cancel
-              </button>
+            <div className="modal-actions">
+              <button className="confirm" onClick={handleDeposit}>Confirm</button>
+              <button className="cancel" onClick={() => setShowDeposit(false)}>Cancel</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MIDDLE */}
-      <div className="middle-section">
-        <ReferralBox
-          referralCode={user.referralCode}
-          referralCount={user.referralCount ?? user.referrals ?? 0}
-        />
-        <Packages user={user} refresh={fetchUser} />
-      </div>
+      {/* WITHDRAW MODAL */}
+      {showWithdraw && (
+        <div className="modal">
+          <div className="modal-card">
+            <h3>Withdraw Funds</h3>
+            <input
+              type="number" placeholder="Amount (KES)"
+              value={amount} onChange={(e) => setAmount(e.target.value)}
+            />
+            <div className="modal-actions">
+              <button className="confirm" onClick={handleWithdraw}>Confirm</button>
+              <button className="cancel" onClick={() => setShowWithdraw(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <ActionButtons userPackage={user.package} />
+      <EarningsCard balance={user.balance ?? 0} />
+      <ReferralBox
+        referralCode={user.referralCode}
+        referrals={user.referralCount ?? user.referrals ?? 0}
+      />
+      <Packages userId={userId} currentPackage={user.package} onPurchased={fetchUser} />
 
       <footer className="mm-footer">
         <Logo size="sm" />
-        <p>© {new Date().getFullYear()} Marketminds. All rights reserved.</p>
+        <span>© {new Date().getFullYear()} Marketminds. All rights reserved.</span>
       </footer>
     </div>
   );
