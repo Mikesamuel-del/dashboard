@@ -1,5 +1,9 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../auth/AuthContext";
 import Logo from "../components/Logo";
@@ -10,6 +14,7 @@ const API_BASE =
 
 export default function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setAuth } = useAuth();
 
   const [name, setName] = useState("");
@@ -22,9 +27,20 @@ export default function Register() {
   const [confirmPassword,
     setConfirmPassword] = useState("");
 
-  // NEW REFERRAL CODE STATE
-  const [referralCode,
-    setReferralCode] = useState("");
+  // REFERRAL CODE
+  const [referredBy,
+    setReferredBy] = useState(() => {
+    try {
+      const params =
+        new URLSearchParams(
+          location.search
+        );
+
+      return params.get("ref") || "";
+    } catch {
+      return "";
+    }
+  });
 
   const [showPassword,
     setShowPassword] = useState(false);
@@ -69,8 +85,9 @@ export default function Register() {
             password,
             confirmPassword,
 
-            // SEND REFERRAL CODE
-            referralCode,
+            // REFERRAL CODE
+            referredBy:
+              referredBy || undefined,
           }),
         }
       );
@@ -187,19 +204,19 @@ export default function Register() {
             />
           </label>
 
-          {/* REFERRAL CODE FIELD */}
+          {/* REFERRAL FIELD */}
           <label>
             Referral code (optional)
 
             <input
-              value={referralCode}
+              value={referredBy}
               onChange={(e) =>
-                setReferralCode(
+                setReferredBy(
                   e.target.value
                 )
               }
               type="text"
-              placeholder="Enter referral code"
+              placeholder="Referral code"
               style={{
                 width: "100%",
                 boxSizing: "border-box",
