@@ -22,6 +22,10 @@ export default function Register() {
   const [confirmPassword,
     setConfirmPassword] = useState("");
 
+  // NEW REFERRAL CODE STATE
+  const [referralCode,
+    setReferralCode] = useState("");
+
   const [showPassword,
     setShowPassword] = useState(false);
 
@@ -64,6 +68,9 @@ export default function Register() {
             email,
             password,
             confirmPassword,
+
+            // SEND REFERRAL CODE
+            referralCode,
           }),
         }
       );
@@ -173,6 +180,26 @@ export default function Register() {
               }
               type="email"
               required
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+              }}
+            />
+          </label>
+
+          {/* REFERRAL CODE FIELD */}
+          <label>
+            Referral code (optional)
+
+            <input
+              value={referralCode}
+              onChange={(e) =>
+                setReferralCode(
+                  e.target.value
+                )
+              }
+              type="text"
+              placeholder="Enter referral code"
               style={{
                 width: "100%",
                 boxSizing: "border-box",
