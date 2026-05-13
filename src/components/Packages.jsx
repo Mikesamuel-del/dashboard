@@ -34,7 +34,7 @@ const Packages = ({ user, refresh }) => {
       advantages: [
         "Withdrawal limit up to 20,000",
         "Referral earn up to 1st level",
-        "Minimum withdrawal KES 30",
+        "Minimum withdrawal KES 3500",
         "Earn from referrals only",
       ],
     },
