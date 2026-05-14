@@ -132,9 +132,11 @@ function App() {
           path="/packages"
           element={
             <RequireAuth>
-              <Packages />
+              {(user) => (
+                <Packages user={user} userId={user?._id} />
+              )}
             </RequireAuth>
-          }
+         } 
         />
       </Routes>
     </Router>
