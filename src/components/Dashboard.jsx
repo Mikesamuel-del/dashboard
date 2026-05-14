@@ -45,9 +45,9 @@ const Dashboard = () => {
 
       // FIX REFERRAL COUNT
       const fixedReferralCount =
-        data.referralCount //
-        data.referrals //
-        data.referral //
+        data.referralCount ??
+        data.referrals ??
+        data.referral ??
         0;
 
       // SAVE DIRECTLY INTO USER STATE
