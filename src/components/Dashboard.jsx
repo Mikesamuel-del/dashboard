@@ -31,7 +31,7 @@ const Dashboard = () => {
     useState("");
 
   const userId =
-  authedUser?.id || authedUser?._id;
+    authedUser?.id || authedUser?._id;
 
   const fetchUser = async () => {
     try {
@@ -43,18 +43,27 @@ const Dashboard = () => {
 
       const data = await res.json();
 
-      setUser(data);
+      // FIX REFERRAL COUNT
+      const fixedReferralCount =
+        data.referralCount ??
+        data.referrals ??
+        data.referral ??
+        0;
 
+      // SAVE DIRECTLY INTO USER STATE
+      setUser({
+        ...data,
+        referralCount: fixedReferralCount,
+      });
+
+      // UPDATE AUTH CONTEXT
       updateUser({
         balance: data.balance,
         package: data.package,
         referralCode:
           data.referralCode,
         referralCount:
-          data.referralCount ??
-          data.referrals ??
-          data.referral ??
-          0,
+          fixedReferralCount,
       });
     } catch (err) {
       console.log("Fetch user error:", err);
@@ -220,7 +229,7 @@ const Dashboard = () => {
         </p>
       </header>
 
-      {/* ===== SMART ALERTS (FIXED - NO KES DUPLICATION) ===== */}
+      {/* ===== SMART ALERTS ===== */}
       {notifications.length > 0 && (
         <div
           className="dashboard-alerts"
@@ -321,7 +330,6 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        {/* ONLY BALANCE HERE */}
         <div className="balance">
           KES {user.balance ?? 0}
         </div>
@@ -406,26 +414,26 @@ const Dashboard = () => {
       )}
 
       {/* ===== COMPONENTS ===== */}
-  <EarningsCard
-   title="Current Balance"
-   amount={user.balance ?? 0}
-  />
+      <EarningsCard
+        title="Current Balance"
+        amount={user.balance ?? 0}
+      />
 
       <ReferralBox
         referralCode={
           user.referralCode
         }
         referrals={
-          user.referralCount ?? 0
+          user.referralCount ??
+          user.referrals ??
+          user.referral ??
+          0
         }
       />
 
       <Packages
-        userId={userId}
-        currentPackage={
-          user.package
-        }
-        onPurchased={fetchUser}
+        user={user}
+        refresh={fetchUser}
       />
 
       {/* ===== FOOTER ===== */}
