@@ -20,22 +20,19 @@ const Dashboard = () => {
   } = useAuth();
 
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const [showDeposit, setShowDeposit] =
-    useState(false);
+  const [showDeposit, setShowDeposit] = useState(false);
+  const [showWithdraw, setShowWithdraw] = useState(false);
+  const [amount, setAmount] = useState("");
 
-  const [showWithdraw, setShowWithdraw] =
-    useState(false);
-
-  const [amount, setAmount] =
-    useState("");
-
-  const userId =
-    authedUser?.id || authedUser?._id;
+  const userId = authedUser?._id || authedUser?.id;
 
   const fetchUser = async () => {
     try {
       if (!userId) return;
+
+      setLoading(true);
 
       const res = await fetch(
         `${API_BASE}/api/user/${userId}`
@@ -43,30 +40,37 @@ const Dashboard = () => {
 
       const data = await res.json();
 
-      // FIX REFERRAL COUNT
       const fixedReferralCount =
         data.referralCount ??
         data.referrals ??
         data.referral ??
         0;
 
-      // SAVE DIRECTLY INTO USER STATE
-      setUser({
+      const updatedUser = {
         ...data,
         referralCount: fixedReferralCount,
-      });
+      };
 
-      // UPDATE AUTH CONTEXT
+      setUser(updatedUser);
+
+      // 🔥 SYNC GLOBAL AUTH STATE
       updateUser({
         balance: data.balance,
         package: data.package,
-        referralCode:
-          data.referralCode,
-        referralCount:
-          fixedReferralCount,
+        referralCode: data.referralCode,
+        referralCount: fixedReferralCount,
       });
+
+      // 🔥 SYNC LOCALSTORAGE (IMPORTANT FOR OTHER PAGES)
+      localStorage.setItem(
+        "user",
+        JSON.stringify(updatedUser)
+      );
+
     } catch (err) {
       console.log("Fetch user error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -83,25 +87,22 @@ const Dashboard = () => {
         {
           method: "POST",
           headers: {
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             amount: Number(amount),
-            phone:
-              user?.phone ||
-              authedUser?.phone,
+            phone: user?.phone || authedUser?.phone,
             userId,
           }),
         }
       );
 
-      alert(
-        "STK Push sent. Enter PIN on your phone."
-      );
+      alert("STK Push sent. Enter PIN on your phone.");
 
       setAmount("");
       setShowDeposit(false);
+
+      fetchUser(); // 🔥 REFRESH AFTER DEPOSIT
     } catch (err) {
       console.log("Deposit error:", err);
       alert("Deposit failed");
@@ -117,8 +118,7 @@ const Dashboard = () => {
         {
           method: "POST",
           headers: {
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             userId,
@@ -129,23 +129,20 @@ const Dashboard = () => {
 
       const data = await res.json();
 
-      alert(
-        data.message ||
-          "Withdraw processed"
-      );
+      alert(data.message || "Withdraw processed");
 
       setAmount("");
       setShowWithdraw(false);
 
-      fetchUser();
+      fetchUser(); // 🔥 REFRESH AFTER WITHDRAW
     } catch (err) {
       console.log("Withdraw error:", err);
     }
   };
 
-  if (!user) return <LoadingSplash />;
+  if (loading || !user) return <LoadingSplash />;
 
-  /* ===== SMART NOTIFICATIONS ===== */
+  /* ===== NOTIFICATIONS ===== */
 
   const notifications = [];
 
@@ -159,10 +156,7 @@ const Dashboard = () => {
     });
   }
 
-  if (
-    !user?.package ||
-    user?.package === "none"
-  ) {
+  if (!user?.package || user?.package === "none") {
     notifications.push({
       type: "danger",
       message:
@@ -194,7 +188,8 @@ const Dashboard = () => {
 
   return (
     <div className="container">
-      {/* ===== BRAND HERO ===== */}
+
+      {/* ===== HEADER ===== */}
       <header className="mm-brand-hero">
         <div className="mm-brand-hero-row">
           <img
@@ -204,19 +199,8 @@ const Dashboard = () => {
           />
 
           <nav className="mm-brand-hero-nav">
-            <Link
-              to="/help"
-              className="mm-brandbar-link"
-            >
-              Help Center
-            </Link>
-
-            <button
-              className="logout-btn"
-              onClick={logout}
-            >
-              Logout
-            </button>
+            <Link to="/help">Help Center</Link>
+            <button onClick={logout}>Logout</button>
           </nav>
         </div>
 
@@ -229,105 +213,23 @@ const Dashboard = () => {
         </p>
       </header>
 
-      {/* ===== SMART ALERTS ===== */}
-      {notifications.length > 0 && (
-        <div
-          className="dashboard-alerts"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "14px",
-            marginBottom: "20px",
-          }}
-        >
-          {notifications.map((note, index) => (
-            <div
-              key={index}
-              style={{
-                padding: "16px",
-                borderRadius: "14px",
-                display: "flex",
-                justifyContent:
-                  "space-between",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: "12px",
-                color: "#fff",
-                background:
-                  note.type === "warning"
-                    ? "#f59e0b"
-                    : note.type === "danger"
-                    ? "#dc2626"
-                    : note.type === "success"
-                    ? "#16a34a"
-                    : "#2563eb",
-              }}
-            >
-              <div
-                style={{
-                  flex: 1,
-                  minWidth: "220px",
-                  lineHeight: "1.5",
-                }}
-              >
-                {note.message}
-              </div>
-
-              <Link
-                to={note.link}
-                style={{
-                  background:
-                    "#ffffff",
-                  color: "#111827",
-                  padding:
-                    "10px 16px",
-                  borderRadius:
-                    "10px",
-                  textDecoration:
-                    "none",
-                  fontWeight: "600",
-                  whiteSpace:
-                    "nowrap",
-                }}
-              >
-                {note.action}
-              </Link>
-            </div>
-          ))}
+      {/* ===== ALERTS ===== */}
+      {notifications.map((note, i) => (
+        <div key={i} className={`alert ${note.type}`}>
+          <span>{note.message}</span>
+          <Link to={note.link}>{note.action}</Link>
         </div>
-      )}
+      ))}
 
       {/* ===== TOP BAR ===== */}
       <div className="top-bar">
-        <div className="top-bar-row">
-          <div>
-            <h2>Account Balance</h2>
-            <div className="top-sub">
-              {user.name} • {user.email} • Package:{" "}
-              <b>
-                {(
-                  user.package ||
-                  "none"
-                ).toUpperCase()}
-              </b>
-            </div>
-          </div>
-        </div>
+        <h2>
+          Account Balance
+        </h2>
 
-        <div className="quick-links">
-          <Link
-            className="link-btn"
-            to="/wallet"
-          >
-            Wallet
-          </Link>
-
-          <Link
-            className="link-btn"
-            to="/account"
-          >
-            Account
-          </Link>
+        <div>
+          {user.name} • {user.email} • Package:{" "}
+          <b>{(user.package || "none").toUpperCase()}</b>
         </div>
 
         <div className="balance">
@@ -335,83 +237,10 @@ const Dashboard = () => {
         </div>
 
         <ActionButtons
-          onDepositClick={() =>
-            setShowDeposit(true)
-          }
-          onWithdrawClick={() =>
-            setShowWithdraw(true)
-          }
+          onDepositClick={() => setShowDeposit(true)}
+          onWithdrawClick={() => setShowWithdraw(true)}
         />
       </div>
-
-      {/* ===== MODALS ===== */}
-      {showDeposit && (
-        <div className="modal">
-          <div className="modal-card">
-            <h3>Deposit via M-Pesa</h3>
-            <input
-              type="number"
-              placeholder="Amount (KES)"
-              value={amount}
-              onChange={(e) =>
-                setAmount(
-                  e.target.value
-                )
-              }
-            />
-            <div className="modal-actions">
-              <button
-                className="confirm"
-                onClick={handleDeposit}
-              >
-                Confirm
-              </button>
-              <button
-                className="cancel"
-                onClick={() =>
-                  setShowDeposit(false)
-                }
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showWithdraw && (
-        <div className="modal">
-          <div className="modal-card">
-            <h3>Withdraw Funds</h3>
-            <input
-              type="number"
-              placeholder="Amount (KES)"
-              value={amount}
-              onChange={(e) =>
-                setAmount(
-                  e.target.value
-                )
-              }
-            />
-            <div className="modal-actions">
-              <button
-                className="confirm"
-                onClick={handleWithdraw}
-              >
-                Confirm
-              </button>
-              <button
-                className="cancel"
-                onClick={() =>
-                  setShowWithdraw(false)
-                }
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ===== COMPONENTS ===== */}
       <EarningsCard
@@ -420,29 +249,17 @@ const Dashboard = () => {
       />
 
       <ReferralBox
-        referralCode={
-          user.referralCode
-        }
-        referrals={
-          user.referralCount ??
-          user.referrals ??
-          user.referral ??
-          0
-        }
+        referralCode={user.referralCode}
+        referrals={user.referralCount ?? 0}
       />
 
-      <Packages
-        user={user}
-        refresh={fetchUser}
-      />
+      <Packages user={user} refresh={fetchUser} />
 
       {/* ===== FOOTER ===== */}
       <footer className="mm-footer">
         <Logo size="sm" />
         <span>
-          ©{" "}
-          {new Date().getFullYear()}{" "}
-          Marketminds. All rights reserved.
+          © {new Date().getFullYear()} Marketminds
         </span>
       </footer>
     </div>
