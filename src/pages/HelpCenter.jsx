@@ -102,14 +102,14 @@ const HelpCenter = () => {
           <ul className="help-contact-list">
             <li>
               <strong>Email</strong>
-              <a href="mailto:support@marketminds.co.ke">
-                support@marketminds.co.ke
+              <a href="mailto: marketmindshelp387@gmail.com">
+                marketmindshelp387@gmail.com
               </a>
             </li>
             <li>
               <strong>WhatsApp</strong>
-              <a href="https://wa.me/254700000000" target="_blank" rel="noreferrer">
-                +254 700 000 000
+              <a href="https://wa.me/254748459757" target="_blank" rel="noreferrer">
+                +254 748 459 757
               </a>
             </li>
             <li>
