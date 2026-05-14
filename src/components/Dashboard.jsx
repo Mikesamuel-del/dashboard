@@ -30,7 +30,8 @@ const Dashboard = () => {
   const [amount, setAmount] =
     useState("");
 
-  const userId = authedUser?.id;
+  const userId =
+  authedUser?.id || authedUser?._id;
 
   const fetchUser = async () => {
     try {
