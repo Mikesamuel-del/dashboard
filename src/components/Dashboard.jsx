@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import EarningsCard from "./EarningsCard";
 import ReferralBox from "./ReferralBox";
-import ActionButtons from "./ActionButtons";
 import Packages from "./Packages";
 import Logo from "./Logo";
 import LoadingSplash from "./LoadingSplash";
@@ -38,7 +37,7 @@ const Dashboard = () => {
 
       const data = await res.json();
 
-      // FIX REFERRALS
+      // FIX REFERRAL COUNT
       const fixedReferralCount =
         data.referralCount ??
         data.referrals ??
@@ -63,7 +62,7 @@ const Dashboard = () => {
           fixedReferralCount,
       });
 
-      // UPDATE LOCAL STORAGE
+      // UPDATE STORAGE
       localStorage.setItem(
         "user",
         JSON.stringify(updatedUser)
@@ -146,7 +145,7 @@ const Dashboard = () => {
   return (
     <div className="container">
 
-      {/* ===== BRAND HERO ===== */}
+      {/* ===== HERO ===== */}
       <header className="mm-brand-hero">
 
         <div className="mm-brand-hero-row">
@@ -157,37 +156,13 @@ const Dashboard = () => {
             className="mm-brand-hero-logo"
           />
 
-          <nav className="mm-brand-hero-nav">
+          <button
+            className="logout-btn"
+            onClick={logout}
+          >
+            Logout
+          </button>
 
-            <Link
-              to="/wallet"
-              className="mm-brandbar-link"
-            >
-              Wallet
-            </Link>
-
-            <Link
-              to="/account"
-              className="mm-brandbar-link"
-            >
-              Account
-            </Link>
-
-            <Link
-              to="/help"
-              className="mm-brandbar-link"
-            >
-              Help Center
-            </Link>
-
-            <button
-              className="logout-btn"
-              onClick={logout}
-            >
-              Logout
-            </button>
-
-          </nav>
         </div>
 
         <div className="mm-brand-hero-wordmark">
@@ -200,7 +175,7 @@ const Dashboard = () => {
 
       </header>
 
-      {/* ===== USER BAR ===== */}
+      {/* ===== ACCOUNT BAR ===== */}
       <div className="top-bar">
 
         <div
@@ -215,12 +190,12 @@ const Dashboard = () => {
           }}
         >
 
-          {/* USER DETAILS */}
+          {/* USER INFO */}
           <div>
 
             <h2
               style={{
-                marginBottom: "6px",
+                marginBottom: "8px",
               }}
             >
               {user.name}
@@ -254,8 +229,7 @@ const Dashboard = () => {
           >
 
             <div className="balance">
-              KES{" "}
-              {user.balance ?? 0}
+              KES {user.balance ?? 0}
             </div>
 
             <div
@@ -271,7 +245,7 @@ const Dashboard = () => {
 
         </div>
 
-        {/* ===== EARNING ACTIONS ===== */}
+        {/* ACCOUNT BUTTONS */}
         <div
           style={{
             display: "flex",
@@ -282,40 +256,137 @@ const Dashboard = () => {
         >
 
           <Link
-            to="/ads"
+            to="/wallet"
             className="link-btn"
           >
-            Watch Ads to Earn
+            Wallet
           </Link>
 
           <Link
-            to="/survey"
+            to="/account"
             className="link-btn"
           >
-            Survey Questions
+            Account
           </Link>
 
           <Link
-            to="/writing"
+            to="/help"
             className="link-btn"
           >
-            Start Online Writing
+            Help Center
           </Link>
 
-        </div>
-
-        {/* ACTION BUTTONS */}
-        <div
-          style={{
-            marginTop: "24px",
-          }}
-        >
-          <ActionButtons />
         </div>
 
       </div>
 
-      {/* ===== SMART ALERTS ===== */}
+      {/* ===== TASKS BAR ===== */}
+      <div className="top-bar">
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: "18px",
+          }}
+        >
+
+          {/* ADS */}
+          <Link
+            to={
+              user?.package &&
+              user?.package !== "none"
+                ? "/ads"
+                : "/packages"
+            }
+            style={{
+              background:
+                "linear-gradient(135deg,#0f172a,#1e3a8a)",
+              color: "#fff",
+              padding: "22px",
+              borderRadius: "18px",
+              textDecoration: "none",
+              fontWeight: "700",
+              fontSize: "18px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "90px",
+              border:
+                "1px solid rgba(255,255,255,0.1)",
+              boxShadow:
+                "0 10px 30px rgba(0,0,0,0.2)",
+            }}
+          >
+            🎥 Watch Ads to Earn
+          </Link>
+
+          {/* SURVEY */}
+          <Link
+            to={
+              user?.package &&
+              user?.package !== "none"
+                ? "/survey"
+                : "/packages"
+            }
+            style={{
+              background:
+                "linear-gradient(135deg,#1e293b,#2563eb)",
+              color: "#fff",
+              padding: "22px",
+              borderRadius: "18px",
+              textDecoration: "none",
+              fontWeight: "700",
+              fontSize: "18px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "90px",
+              border:
+                "1px solid rgba(255,255,255,0.1)",
+              boxShadow:
+                "0 10px 30px rgba(0,0,0,0.2)",
+            }}
+          >
+            📋 Survey Questions
+          </Link>
+
+          {/* WRITING */}
+          <Link
+            to={
+              user?.package &&
+              user?.package !== "none"
+                ? "/writing"
+                : "/packages"
+            }
+            style={{
+              background:
+                "linear-gradient(135deg,#111827,#374151)",
+              color: "#fff",
+              padding: "22px",
+              borderRadius: "18px",
+              textDecoration: "none",
+              fontWeight: "700",
+              fontSize: "18px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "90px",
+              border:
+                "1px solid rgba(255,255,255,0.1)",
+              boxShadow:
+                "0 10px 30px rgba(0,0,0,0.2)",
+            }}
+          >
+            ✍️ Start Online Writing
+          </Link>
+
+        </div>
+
+      </div>
+
+      {/* ===== SMART NOTIFICATIONS ===== */}
       {notifications.length > 0 && (
         <div
           className="dashboard-alerts"
@@ -398,7 +469,7 @@ const Dashboard = () => {
         amount={user.balance ?? 0}
       />
 
-      {/* FIXED REFERRALS */}
+      {/* REFERRALS */}
       <ReferralBox
         referralCode={
           user.referralCode
