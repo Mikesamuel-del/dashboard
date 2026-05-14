@@ -1,5 +1,9 @@
 import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../auth/AuthContext";
 import Logo from "../components/Logo";
@@ -16,7 +20,9 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] =
+    useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -58,9 +64,15 @@ export default function Login() {
         user: data.user,
       });
 
-      // 🔥 CRITICAL FIX: PERSIST LOGIN (THIS FIXES YOUR ISSUE)
-      localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem("token", data.token);
+      // 🔥 PERSIST LOGIN (CRITICAL FIX)
+      localStorage.setItem(
+        "user",
+        JSON.stringify(data.user)
+      );
+      localStorage.setItem(
+        "token",
+        data.token
+      );
 
       toast.success("Login successful");
 
@@ -123,7 +135,7 @@ export default function Login() {
 
           <label>
             Password
-            <div style={{ position: "relative" }}>
+            <div className="password-wrapper">
               <input
                 value={password}
                 onChange={(e) =>
@@ -136,27 +148,19 @@ export default function Login() {
                 }
                 placeholder="Your password"
                 required
-                style={{
-                  width: "100%",
-                  paddingRight: "50px",
-                }}
               />
 
               <span
                 onClick={() =>
-                  setShowPassword(!showPassword)
+                  setShowPassword(
+                    !showPassword
+                  )
                 }
-                style={{
-                  position: "absolute",
-                  right: "15px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  cursor: "pointer",
-                  fontSize: "20px",
-                  userSelect: "none",
-                }}
+                className="toggle-password"
               >
-                {showPassword ? "🙈" : "👁️"}
+                {showPassword
+                  ? "🙈"
+                  : "👁️"}
               </span>
             </div>
           </label>
@@ -166,7 +170,9 @@ export default function Login() {
             type="submit"
             className="mm-auth-btn"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading
+              ? "Logging in..."
+              : "Login"}
           </button>
 
           <div className="mm-auth-inline">
@@ -178,9 +184,37 @@ export default function Login() {
 
         <p className="mm-auth-footer">
           Don’t have an account?{" "}
-          <Link to="/register">Register</Link>
+          <Link to="/register">
+            Register
+          </Link>
         </p>
       </div>
+
+      {/* Minimal fix styling ONLY for password field */}
+      <style>
+        {`
+          .password-wrapper {
+            position: relative;
+            width: 100%;
+          }
+
+          .password-wrapper input {
+            width: 100%;
+            box-sizing: border-box;
+            padding-right: 40px;
+          }
+
+          .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 18px;
+            user-select: none;
+          }
+        `}
+      </style>
     </div>
   );
 }
