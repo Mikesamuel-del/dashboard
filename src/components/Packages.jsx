@@ -58,17 +58,22 @@ const Packages = ({
     user?._id ||
     user?.id ||
     storedUser?._id ||
-    storedUser?.id;
+    storedUser?.id ||
+    storedUser?.user?._id ||
+    storedUser?.user?.id;
 
   const buy = async (packageType) => {
     try {
       // DEBUG
-      console.log(
-        "BUY PACKAGE USER ID:",
-        realUserId
-      );
+      console.log("USER PROP:", user);
+      console.log("USER ID PROP:", userId);
+      console.log("LOCAL STORAGE USER:", storedUser);
+      console.log("FINAL USER ID:", realUserId);
 
-      if (!realUserId) {
+      if (
+        !realUserId ||
+        realUserId === "undefined"
+      ) {
         toast.error("User not found");
         return;
       }
