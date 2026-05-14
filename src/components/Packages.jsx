@@ -12,6 +12,21 @@ const Packages = ({
   currentPackage,
   onPurchased,
 }) => {
+
+  // WAIT UNTIL USER LOADS
+  if (!user && !userId) {
+    return (
+      <div
+        style={{
+          padding: "20px",
+          textAlign: "center",
+        }}
+      >
+        Loading user...
+      </div>
+    );
+  }
+
   const packages = [
     {
       name: "Gold",
@@ -64,11 +79,8 @@ const Packages = ({
 
   const buy = async (packageType) => {
     try {
-      // DEBUG
-      console.log("USER PROP:", user);
-      console.log("USER ID PROP:", userId);
-      console.log("LOCAL STORAGE USER:", storedUser);
-      console.log("FINAL USER ID:", realUserId);
+      console.log("USER:", user);
+      console.log("USER ID:", realUserId);
 
       if (
         !realUserId ||
@@ -112,7 +124,6 @@ const Packages = ({
           "Package purchased"
       );
 
-      // REFRESH DASHBOARD
       refresh?.();
       onPurchased?.();
 
