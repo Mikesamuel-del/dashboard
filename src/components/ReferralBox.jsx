@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import { toast } from "react-toastify";
 
+console.log("ReferralBox referralCount:", referralCount);
 const ReferralBox = ({ referralCode, referralCount }) => {
   const refLink = `${window.location.origin}/register?ref=${encodeURIComponent(
     referralCode || ""
