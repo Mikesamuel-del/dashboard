@@ -16,9 +16,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [showPassword, setShowPassword] =
-    useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -54,10 +52,17 @@ export default function Login() {
         );
       }
 
+      // ✅ AUTH STATE (React)
       setAuth({
         token: data.token,
         user: data.user,
       });
+
+      // 🔥 CRITICAL FIX: PERSIST LOGIN (THIS FIXES YOUR ISSUE)
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
+
+      toast.success("Login successful");
 
       navigate(from, { replace: true });
     } catch (err) {
@@ -105,7 +110,6 @@ export default function Login() {
         >
           <label>
             Email
-
             <input
               value={email}
               onChange={(e) =>
@@ -114,22 +118,12 @@ export default function Login() {
               type="email"
               placeholder="you@email.com"
               required
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-              }}
             />
           </label>
 
           <label>
             Password
-
-            <div
-              style={{
-                position: "relative",
-                width: "100%",
-              }}
-            >
+            <div style={{ position: "relative" }}>
               <input
                 value={password}
                 onChange={(e) =>
@@ -145,30 +139,24 @@ export default function Login() {
                 style={{
                   width: "100%",
                   paddingRight: "50px",
-                  boxSizing: "border-box",
                 }}
               />
 
               <span
                 onClick={() =>
-                  setShowPassword(
-                    !showPassword
-                  )
+                  setShowPassword(!showPassword)
                 }
                 style={{
                   position: "absolute",
                   right: "15px",
                   top: "50%",
-                  transform:
-                    "translateY(-50%)",
+                  transform: "translateY(-50%)",
                   cursor: "pointer",
                   fontSize: "20px",
                   userSelect: "none",
                 }}
               >
-                {showPassword
-                  ? "🙈"
-                  : "👁️"}
+                {showPassword ? "🙈" : "👁️"}
               </span>
             </div>
           </label>
@@ -178,9 +166,7 @@ export default function Login() {
             type="submit"
             className="mm-auth-btn"
           >
-            {loading
-              ? "Logging in..."
-              : "Login"}
+            {loading ? "Logging in..." : "Login"}
           </button>
 
           <div className="mm-auth-inline">
@@ -192,9 +178,7 @@ export default function Login() {
 
         <p className="mm-auth-footer">
           Don’t have an account?{" "}
-          <Link to="/register">
-            Register
-          </Link>
+          <Link to="/register">Register</Link>
         </p>
       </div>
     </div>
