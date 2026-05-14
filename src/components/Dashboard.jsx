@@ -53,6 +53,7 @@ const Dashboard = () => {
         referralCount:
           data.referralCount ??
           data.referrals ??
+          data.referral ??
           0,
       });
     } catch (err) {
