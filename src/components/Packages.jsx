@@ -4,6 +4,9 @@ import { toast } from "react-toastify";
 const API_BASE =
   process.env.REACT_APP_API_BASE ||
   "http://localhost:5000";
+  
+const userId =
+    authedUser?.id || authedUser?._id;
 
 const Packages = ({
   user,
