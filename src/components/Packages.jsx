@@ -5,26 +5,27 @@ const API_BASE =
   process.env.REACT_APP_API_BASE ||
   "http://localhost:5000";
 
-const Packages = () => {
+const Packages = ({
+  user,
+  refresh,
+  userId,
+  currentPackage,
+  onPurchased,
+}) => {
 
-  // ALWAYS READ USER FROM LOCALSTORAGE (SOURCE OF TRUTH)
+  // SAFE USER LOAD (NO BREAKING UI)
   const storedUser = JSON.parse(
     localStorage.getItem("user") || "null"
   );
 
   const realUserId =
+    userId ||
+    user?._id ||
+    user?.id ||
     storedUser?._id ||
     storedUser?.id;
 
-  const user = storedUser;
-
-  if (!realUserId) {
-    return (
-      <div style={{ padding: "20px", textAlign: "center" }}>
-        Please log in again.
-      </div>
-    );
-  }
+  const safeUser = user || storedUser;
 
   const packages = [
     {
@@ -66,6 +67,11 @@ const Packages = () => {
     try {
       console.log("USER ID:", realUserId);
 
+      if (!realUserId) {
+        toast.error("User not found");
+        return;
+      }
+
       const res = await fetch(
         `${API_BASE}/api/user/buy`,
         {
@@ -84,7 +90,9 @@ const Packages = () => {
 
       if (!res.ok || data?.success === false) {
         toast.error(
-          data?.message || data?.error || "Purchase failed"
+          data?.message ||
+            data?.error ||
+            "Purchase failed"
         );
         return;
       }
@@ -93,22 +101,33 @@ const Packages = () => {
         data?.message || "Package purchased"
       );
 
+      refresh?.();
+      onPurchased?.();
     } catch (e) {
       console.log("PACKAGE PURCHASE ERROR:", e);
       toast.error("Purchase failed");
     }
   };
 
-  const current = (user?.package || "none").toLowerCase();
+  const current = (
+    currentPackage ||
+    safeUser?.package ||
+    "none"
+  ).toLowerCase();
 
   return (
-    <section className="packages-section">
+    <section
+      className="packages-section"
+      aria-labelledby="packages-heading"
+    >
       <div className="packages-section-head">
-        <h2>Packages</h2>
+        <h2 id="packages-heading">Packages</h2>
 
-        <p>
+        <p className="packages-section-sub">
           Current plan:{" "}
-          <strong>{(user?.package || "none").toUpperCase()}</strong>
+          <strong>
+            {(safeUser?.package || "none").toUpperCase()}
+          </strong>
         </p>
       </div>
 
@@ -119,30 +138,51 @@ const Packages = () => {
           return (
             <article
               key={pkg.id}
-              className={`package-card${active ? " is-active" : ""}`}
+              className={`package-card${
+                active ? " is-active" : ""
+              }`}
             >
               <div className="package-card-body">
-                <h3>{pkg.name}</h3>
+                <header className="package-card-top">
+                  <h3 className="package-title">
+                    {pkg.name}
+                  </h3>
 
-                <p>
-                  KES <strong>{pkg.price}</strong>
-                </p>
+                  <p className="package-price">
+                    <span className="package-price-label">
+                      KES
+                    </span>
+                    <span className="package-price-value">
+                      {pkg.price}
+                    </span>
+                  </p>
 
-                {active && <span>Active</span>}
+                  {active && (
+                    <span className="package-badge">
+                      Active
+                    </span>
+                  )}
+                </header>
 
-                <ul>
+                <ul className="package-features">
                   {pkg.advantages.map((adv, i) => (
                     <li key={i}>{adv}</li>
                   ))}
                 </ul>
               </div>
 
-              <button
-                disabled={active}
-                onClick={() => buy(pkg.id)}
-              >
-                {active ? "Active plan" : `Buy ${pkg.name}`}
-              </button>
+              <div className="package-card-actions">
+                <button
+                  type="button"
+                  className="buy-btn"
+                  disabled={active}
+                  onClick={() => buy(pkg.id)}
+                >
+                  {active
+                    ? "Active plan"
+                    : `Buy ${pkg.name}`}
+                </button>
+              </div>
             </article>
           );
         })}
