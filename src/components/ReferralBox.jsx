@@ -1,26 +1,28 @@
 import React, { useCallback } from "react";
 import { toast } from "react-toastify";
+import { useAuth } from "../auth/AuthContext";
 
-const ReferralBox = ({ referralCode, referralCount }) => {
+const ReferralBox = () => {
+  const { user } = useAuth();
+
+  // SAME LOGIC AS ACCOUNT PAGE (IMPORTANT)
+  const referralCount =
+    user?.referralCount ?? user?.referrals ?? 0;
+
+  const referralCode = user?.referralCode || "";
+
   const refLink = `${window.location.origin}/register?ref=${encodeURIComponent(
-    referralCode || ""
+    referralCode
   )}`;
 
-  const refCode = referralCode || "";
-
-  // FIX: ensure safe number
-  const count = Number(referralCount) || 0;
-
   const copyText = useCallback(async (label, text) => {
-    const value = text || "";
-
-    if (!value) {
+    if (!text) {
       toast.error("Nothing to copy yet.");
       return;
     }
 
     try {
-      await navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(text);
       toast.success(`${label} copied`);
     } catch {
       toast.error("Could not copy — try manually.");
@@ -35,13 +37,13 @@ const ReferralBox = ({ referralCode, referralCount }) => {
           <h2>Refer & Earn</h2>
           <p>
             Share your referral code or link and earn rewards when users
-            register and purchase.
+            register using your code.
           </p>
         </div>
 
         <div className="referral-count">
-          <span>Referrals</span>
-          <h1>{count}</h1>
+          <span>Total Referrals</span>
+          <h1>{referralCount}</h1>
         </div>
       </div>
 
@@ -49,12 +51,12 @@ const ReferralBox = ({ referralCode, referralCount }) => {
       <div className="referral-block">
         <div className="referral-top">
           <span>Referral Code</span>
-          <button onClick={() => copyText("Referral code", refCode)}>
+          <button onClick={() => copyText("Referral code", referralCode)}>
             Copy
           </button>
         </div>
 
-        <input value={refCode} readOnly />
+        <input value={referralCode || "—"} readOnly />
       </div>
 
       {/* LINK */}
@@ -66,33 +68,34 @@ const ReferralBox = ({ referralCode, referralCount }) => {
           </button>
         </div>
 
-        <input value={refLink} readOnly />
+        <input value={refLink || "—"} readOnly />
       </div>
 
-      {/* STYLES */}
+      {/* GOLD + BLACK STYLES */}
       <style>{`
         .referral-card{
-          background: linear-gradient(135deg,#000,#111);
-          border: 1px solid rgba(212,175,55,0.25);
+          background: linear-gradient(135deg,#000,#0a0a0a);
+          border: 1px solid rgba(212,175,55,0.35);
           border-radius: 22px;
           padding: 24px;
           color: #fff;
-          box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+          box-shadow: 0 10px 40px rgba(0,0,0,0.7);
         }
 
         .referral-header{
           display:flex;
           justify-content:space-between;
           align-items:center;
-          margin-bottom:22px;
           flex-wrap:wrap;
           gap:20px;
+          margin-bottom:22px;
         }
 
         .referral-header h2{
           margin:0;
           color:#d4af37;
           font-size:26px;
+          letter-spacing:0.5px;
         }
 
         .referral-header p{
@@ -105,10 +108,10 @@ const ReferralBox = ({ referralCode, referralCount }) => {
           background: linear-gradient(135deg,#d4af37,#b8860b);
           padding:18px 26px;
           border-radius:16px;
-          text-align:center;
-          min-width:130px;
           color:#000;
+          text-align:center;
           box-shadow:0 10px 25px rgba(212,175,55,0.25);
+          min-width:140px;
         }
 
         .referral-count span{
@@ -118,7 +121,7 @@ const ReferralBox = ({ referralCode, referralCount }) => {
 
         .referral-count h1{
           margin:0;
-          font-size:30px;
+          font-size:32px;
         }
 
         .referral-block{
@@ -145,14 +148,19 @@ const ReferralBox = ({ referralCode, referralCount }) => {
           border-radius:8px;
           font-weight:700;
           cursor:pointer;
+          transition:0.2s;
+        }
+
+        .referral-top button:hover{
+          transform:scale(1.05);
         }
 
         input{
           width:100%;
           padding:14px;
           border-radius:12px;
-          border:1px solid rgba(212,175,55,0.25);
           background:#0a0a0a;
+          border:1px solid rgba(212,175,55,0.25);
           color:#fff;
           outline:none;
         }
