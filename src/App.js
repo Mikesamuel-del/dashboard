@@ -1,34 +1,69 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+} from "react-router-dom";
+
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 import Dashboard from "./components/Dashboard";
+import Packages from "./components/Packages";
+
 import Ads from "./pages/Ads";
 import Writing from "./pages/Writing";
 import Survey from "./pages/Survey";
-import "./styles.css";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import RequireAuth from "./auth/RequireAuth";
 import Account from "./pages/Account";
 import Wallet from "./pages/Wallet";
 import History from "./pages/History";
 import HelpCenter from "./pages/HelpCenter";
-import Packages from "./components/Packages";
+
+import RequireAuth from "./auth/RequireAuth";
+
+import "./styles.css";
 
 function App() {
   return (
     <Router>
-      <ToastContainer position="top-center" newestOnTop theme="colored" />
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/help" element={<HelpCenter />} />
+      <ToastContainer
+        position="top-center"
+        newestOnTop
+        theme="colored"
+      />
 
+      <Routes>
+        {/* PUBLIC ROUTES */}
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword />}
+        />
+
+        <Route
+          path="/reset-password/:token"
+          element={<ResetPassword />}
+        />
+
+        <Route
+          path="/help"
+          element={<HelpCenter />}
+        />
+
+        {/* PROTECTED ROUTES */}
         <Route
           path="/"
           element={
@@ -37,6 +72,7 @@ function App() {
             </RequireAuth>
           }
         />
+
         <Route
           path="/ads"
           element={
@@ -45,6 +81,7 @@ function App() {
             </RequireAuth>
           }
         />
+
         <Route
           path="/writing"
           element={
@@ -53,6 +90,7 @@ function App() {
             </RequireAuth>
           }
         />
+
         <Route
           path="/survey"
           element={
@@ -61,6 +99,7 @@ function App() {
             </RequireAuth>
           }
         />
+
         <Route
           path="/account"
           element={
@@ -69,6 +108,7 @@ function App() {
             </RequireAuth>
           }
         />
+
         <Route
           path="/wallet"
           element={
@@ -77,11 +117,22 @@ function App() {
             </RequireAuth>
           }
         />
+
         <Route
           path="/history"
           element={
             <RequireAuth>
               <History />
+            </RequireAuth>
+          }
+        />
+
+        {/* PACKAGES ROUTE */}
+        <Route
+          path="/packages"
+          element={
+            <RequireAuth>
+              <Packages />
             </RequireAuth>
           }
         />
