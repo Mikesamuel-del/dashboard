@@ -16,6 +16,7 @@ import Account from "./pages/Account";
 import Wallet from "./pages/Wallet";
 import History from "./pages/History";
 import HelpCenter from "./pages/HelpCenter";
+import Packages from "./components/Packages";
 
 function App() {
   return (
