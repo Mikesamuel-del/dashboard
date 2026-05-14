@@ -424,9 +424,9 @@ const Dashboard = () => {
           user.referralCode
         }
         referrals={
-          user.referralCount //
-          user.referrals //
-          user.referral //
+          user.referralCount ??
+          user.referrals ??
+          user.referral ??
           0
         }
       />
