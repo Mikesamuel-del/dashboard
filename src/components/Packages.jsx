@@ -5,24 +5,23 @@ const API_BASE =
   process.env.REACT_APP_API_BASE ||
   "http://localhost:5000";
 
-const Packages = ({
-  user,
-  refresh,
-  userId,
-  currentPackage,
-  onPurchased,
-}) => {
+const Packages = () => {
 
-  // WAIT UNTIL USER LOADS
-  if (!user && !userId) {
+  // ALWAYS READ USER FROM LOCALSTORAGE (SOURCE OF TRUTH)
+  const storedUser = JSON.parse(
+    localStorage.getItem("user") || "null"
+  );
+
+  const realUserId =
+    storedUser?._id ||
+    storedUser?.id;
+
+  const user = storedUser;
+
+  if (!realUserId) {
     return (
-      <div
-        style={{
-          padding: "20px",
-          textAlign: "center",
-        }}
-      >
-        Loading user...
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        Please log in again.
       </div>
     );
   }
@@ -63,40 +62,16 @@ const Packages = ({
     },
   ];
 
-  // GET REAL USER ID SAFELY
-  const storedUser = JSON.parse(
-    localStorage.getItem("user") || "{}"
-  );
-
-  const realUserId =
-    userId ||
-    user?._id ||
-    user?.id ||
-    storedUser?._id ||
-    storedUser?.id ||
-    storedUser?.user?._id ||
-    storedUser?.user?.id;
-
   const buy = async (packageType) => {
     try {
-      console.log("USER:", user);
       console.log("USER ID:", realUserId);
-
-      if (
-        !realUserId ||
-        realUserId === "undefined"
-      ) {
-        toast.error("User not found");
-        return;
-      }
 
       const res = await fetch(
         `${API_BASE}/api/user/buy`,
         {
           method: "POST",
           headers: {
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             userId: realUserId,
@@ -107,126 +82,67 @@ const Packages = ({
 
       const data = await res.json();
 
-      if (
-        !res.ok ||
-        data?.success === false
-      ) {
+      if (!res.ok || data?.success === false) {
         toast.error(
-          data?.message ||
-            data?.error ||
-            "Purchase failed"
+          data?.message || data?.error || "Purchase failed"
         );
         return;
       }
 
       toast.success(
-        data?.message ||
-          "Package purchased"
+        data?.message || "Package purchased"
       );
-
-      refresh?.();
-      onPurchased?.();
 
     } catch (e) {
-      console.log(
-        "PACKAGE PURCHASE ERROR:",
-        e
-      );
-
+      console.log("PACKAGE PURCHASE ERROR:", e);
       toast.error("Purchase failed");
     }
   };
 
-  const current = (
-    currentPackage ||
-    user?.package ||
-    "none"
-  ).toLowerCase();
+  const current = (user?.package || "none").toLowerCase();
 
   return (
-    <section
-      className="packages-section"
-      aria-labelledby="packages-heading"
-    >
+    <section className="packages-section">
       <div className="packages-section-head">
-        <h2 id="packages-heading">
-          Packages
-        </h2>
+        <h2>Packages</h2>
 
-        <p className="packages-section-sub">
+        <p>
           Current plan:{" "}
-          <strong>
-            {(
-              currentPackage ||
-              user?.package ||
-              "none"
-            ).toUpperCase()}
-          </strong>
+          <strong>{(user?.package || "none").toUpperCase()}</strong>
         </p>
       </div>
 
       <div className="package-cards-grid">
         {packages.map((pkg) => {
-          const active =
-            current === pkg.id;
+          const active = current === pkg.id;
 
           return (
             <article
               key={pkg.id}
-              className={`package-card${
-                active
-                  ? " is-active"
-                  : ""
-              }`}
+              className={`package-card${active ? " is-active" : ""}`}
             >
               <div className="package-card-body">
-                <header className="package-card-top">
-                  <h3 className="package-title">
-                    {pkg.name}
-                  </h3>
+                <h3>{pkg.name}</h3>
 
-                  <p className="package-price">
-                    <span className="package-price-label">
-                      KES
-                    </span>
+                <p>
+                  KES <strong>{pkg.price}</strong>
+                </p>
 
-                    <span className="package-price-value">
-                      {pkg.price}
-                    </span>
-                  </p>
+                {active && <span>Active</span>}
 
-                  {active ? (
-                    <span className="package-badge">
-                      Active
-                    </span>
-                  ) : null}
-                </header>
-
-                <ul className="package-features">
-                  {pkg.advantages.map(
-                    (adv, i) => (
-                      <li key={i}>
-                        {adv}
-                      </li>
-                    )
-                  )}
+                <ul>
+                  {pkg.advantages.map((adv, i) => (
+                    <li key={i}>{adv}</li>
+                  ))}
                 </ul>
               </div>
 
-              <div className="package-card-actions">
-                <button
-                  type="button"
-                  className="buy-btn"
-                  disabled={active}
-                  onClick={() =>
-                    buy(pkg.id)
-                  }
-                >
-                  {active
-                    ? "Active plan"
-                    : `Buy ${pkg.name}`}
-                </button>
-              </div>
+              <button
+                disabled={active}
+                onClick={() => buy(pkg.id)}
+              >
+                {active ? "Active plan" : `Buy ${pkg.name}`}
+              </button>
             </article>
           );
         })}
