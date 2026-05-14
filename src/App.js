@@ -1,8 +1,8 @@
 import React from "react";
 import {
-BrowserRouter as Router,
-Routes,
-Route,
+  BrowserRouter as Router,
+  Routes,
+  Route,
 } from "react-router-dom";
 
 import { ToastContainer } from "react-toastify";
@@ -28,121 +28,98 @@ import RequireAuth from "./auth/RequireAuth";
 import "./styles.css";
 
 function App() {
-return (
-<Router>
-<ToastContainer  
-position="top-center"  
-newestOnTop  
-theme="colored"  
-/>
-
-<Routes>  
-    {/* PUBLIC ROUTES */}  
-    <Route  
-      path="/login"  
-      element={<Login />}  
-    />  
-
-    <Route  
-      path="/register"  
-      element={<Register />}  
-    />  
-
-    <Route  
-      path="/forgot-password"  
-      element={<ForgotPassword />}  
-    />  
-
-    <Route  
-      path="/reset-password/:token"  
-      element={<ResetPassword />}  
-    />  
-
-    <Route  
-      path="/help"  
-      element={<HelpCenter />}  
-    />  
-
-    {/* PROTECTED ROUTES */}  
-    <Route  
-      path="/"  
-      element={  
-        <RequireAuth>  
-          <Dashboard />  
-        </RequireAuth>  
-      }  
-    />  
-
-    <Route  
-      path="/ads"  
-      element={  
-        <RequireAuth>  
-          <Ads />  
-        </RequireAuth>  
-      }  
-    />  
-
-    <Route  
-      path="/writing"  
-      element={  
-        <RequireAuth>  
-          <Writing />  
-        </RequireAuth>  
-      }  
-    />  
-
-    <Route  
-      path="/survey"  
-      element={  
-        <RequireAuth>  
-          <Survey />  
-        </RequireAuth>  
-      }  
-    />  
-
-    <Route  
-      path="/account"  
-      element={  
-        <RequireAuth>  
-          <Account />  
-        </RequireAuth>  
-      }  
-    />  
-
-    <Route  
-      path="/wallet"  
-      element={  
-        <RequireAuth>  
-          <Wallet />  
-        </RequireAuth>  
-      }  
-    />  
-
-    <Route  
-      path="/history"  
-      element={  
-        <RequireAuth>  
-          <History />  
-        </RequireAuth>  
-      }  
-    />  
-
-    {/* PACKAGES ROUTE */}  
-<Route
-  path="/packages"
-  element={
-    <RequireAuth>
-      <Packages
-        user={JSON.parse(localStorage.getItem("user"))}
-        userId={JSON.parse(localStorage.getItem("user"))?._id}
+  return (
+    <Router>
+      <ToastContainer
+        position="top-center"
+        newestOnTop
+        theme="colored"
       />
-    </RequireAuth>
-  }
-/>
-  </Routes>  
-</Router>
 
-);
+      <Routes>
+        {/* PUBLIC ROUTES */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/help" element={<HelpCenter />} />
+
+        {/* PROTECTED ROUTES */}
+        <Route
+          path="/"
+          element={
+            <RequireAuth>
+              <Dashboard />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/ads"
+          element={
+            <RequireAuth>
+              <Ads />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/writing"
+          element={
+            <RequireAuth>
+              <Writing />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/survey"
+          element={
+            <RequireAuth>
+              <Survey />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/account"
+          element={
+            <RequireAuth>
+              <Account />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/wallet"
+          element={
+            <RequireAuth>
+              <Wallet />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/history"
+          element={
+            <RequireAuth>
+              <History />
+            </RequireAuth>
+          }
+        />
+
+        {/* PACKAGES ROUTE (FIXED) */}
+        <Route
+          path="/packages"
+          element={
+            <RequireAuth>
+              <Packages />
+            </RequireAuth>
+          }
+        />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;
