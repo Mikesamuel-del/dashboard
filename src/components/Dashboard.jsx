@@ -13,24 +13,32 @@ const API_BASE =
   "http://localhost:5000";
 
 const Dashboard = () => {
-  const { user: authedUser, logout, updateUser } = useAuth();
+  const {
+    user: authedUser,
+    logout,
+    updateUser,
+  } = useAuth();
 
   const [user, setUser] = useState(null);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [showDeposit, setShowDeposit] = useState(false);
-  const [showWithdraw, setShowWithdraw] = useState(false);
-  const [amount, setAmount] = useState("");
+  const userId =
+    authedUser?._id ||
+    authedUser?.id;
 
-  const userId = authedUser?._id || authedUser?.id;
-
-  // 🔥 FIX: single source refresh function
+  // FETCH USER
   const fetchUser = async () => {
     try {
       if (!userId) return;
 
-      const res = await fetch(`${API_BASE}/api/user/${userId}`);
+      const res = await fetch(
+        `${API_BASE}/api/user/${userId}`
+      );
+
       const data = await res.json();
 
+      // FIX REFERRALS
       const fixedReferralCount =
         data.referralCount ??
         data.referrals ??
@@ -39,24 +47,35 @@ const Dashboard = () => {
 
       const updatedUser = {
         ...data,
-        referralCount: fixedReferralCount,
+        referralCount:
+          fixedReferralCount,
       };
 
       setUser(updatedUser);
 
-      // sync global auth
+      // UPDATE AUTH
       updateUser({
         balance: data.balance,
         package: data.package,
-        referralCode: data.referralCode,
-        referralCount: fixedReferralCount,
+        referralCode:
+          data.referralCode,
+        referralCount:
+          fixedReferralCount,
       });
 
-      // sync localStorage
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      // UPDATE LOCAL STORAGE
+      localStorage.setItem(
+        "user",
+        JSON.stringify(updatedUser)
+      );
 
     } catch (err) {
-      console.log("Fetch user error:", err);
+      console.log(
+        "Fetch user error:",
+        err
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,76 +83,41 @@ const Dashboard = () => {
     fetchUser();
   }, [userId]);
 
-  // 🔥 FIX: auto refresh every 10s (THIS FIXES REFERRALS NOT UPDATING)
+  // AUTO REFRESH
   useEffect(() => {
     const interval = setInterval(() => {
       fetchUser();
     }, 10000);
 
-    return () => clearInterval(interval);
+    return () =>
+      clearInterval(interval);
   }, [userId]);
 
-  const handleDeposit = async () => {
-    if (!amount) return;
+  if (loading || !user)
+    return <LoadingSplash />;
 
-    await fetch(`${API_BASE}/api/payment/deposit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount: Number(amount),
-        phone: user?.phone || authedUser?.phone,
-        userId,
-      }),
-    });
+  /* ===== SMART NOTIFICATIONS ===== */
 
-    alert("STK Push sent. Enter PIN on your phone.");
-
-    setAmount("");
-    setShowDeposit(false);
-
-    fetchUser(); // refresh
-  };
-
-  const handleWithdraw = async () => {
-    if (!amount || amount <= 0) return;
-
-    const res = await fetch(`${API_BASE}/api/user/withdraw`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId,
-        amount: Number(amount),
-      }),
-    });
-
-    const data = await res.json();
-
-    alert(data.message || "Withdraw processed");
-
-    setAmount("");
-    setShowWithdraw(false);
-
-    fetchUser(); // refresh
-  };
-
-  if (!user) return <LoadingSplash />;
-
-  /* ===== NOTIFICATIONS (UNCHANGED) ===== */
   const notifications = [];
 
   if ((user?.balance || 0) <= 0) {
     notifications.push({
       type: "warning",
-      message: "Your account balance is zero. Deposit funds to continue earning.",
+      message:
+        "Your account balance is zero. Deposit funds to continue earning.",
       action: "Deposit Now",
       link: "/wallet",
     });
   }
 
-  if (!user?.package || user?.package === "none") {
+  if (
+    !user?.package ||
+    user?.package === "none"
+  ) {
     notifications.push({
       type: "danger",
-      message: "You do not have an active package. Buy one to unlock earnings and withdrawals.",
+      message:
+        "You do not have an active package. Buy one to unlock earnings and withdrawals.",
       action: "Buy Package",
       link: "/packages",
     });
@@ -142,7 +126,8 @@ const Dashboard = () => {
   if (user?.package === "bronze") {
     notifications.push({
       type: "info",
-      message: "Upgrade to Silver package for higher withdrawal limits and better rewards.",
+      message:
+        "Upgrade to Silver package for higher withdrawal limits and better rewards.",
       action: "Upgrade Now",
       link: "/packages",
     });
@@ -151,7 +136,8 @@ const Dashboard = () => {
   if (user?.package === "silver") {
     notifications.push({
       type: "success",
-      message: "Upgrade to Gold package to enjoy full access and maximum referral benefits.",
+      message:
+        "Upgrade to Gold package to enjoy full access and maximum referral benefits.",
       action: "Go Gold",
       link: "/packages",
     });
@@ -160,9 +146,11 @@ const Dashboard = () => {
   return (
     <div className="container">
 
-      {/* ===== BRAND HERO (UNCHANGED) ===== */}
+      {/* ===== BRAND HERO ===== */}
       <header className="mm-brand-hero">
+
         <div className="mm-brand-hero-row">
+
           <img
             src={require("../assets/marketminds-logo.png")}
             alt="Marketminds"
@@ -170,21 +158,35 @@ const Dashboard = () => {
           />
 
           <nav className="mm-brand-hero-nav">
-            <Link to="/help" className="mm-brandbar-link">
-              Help Center
-            </Link>
 
-            <Link to="/account" className="mm-brandbar-link">
-              Account
-            </Link>
-
-            <Link to="/wallet" className="mm-brandbar-link">
+            <Link
+              to="/wallet"
+              className="mm-brandbar-link"
+            >
               Wallet
             </Link>
 
-            <button className="logout-btn" onClick={logout}>
+            <Link
+              to="/account"
+              className="mm-brandbar-link"
+            >
+              Account
+            </Link>
+
+            <Link
+              to="/help"
+              className="mm-brandbar-link"
+            >
+              Help Center
+            </Link>
+
+            <button
+              className="logout-btn"
+              onClick={logout}
+            >
               Logout
             </button>
+
           </nav>
         </div>
 
@@ -195,58 +197,235 @@ const Dashboard = () => {
         <p className="mm-brand-hero-tagline">
           Smart investments. Steady growth.
         </p>
+
       </header>
 
-      {/* ===== NOTIFICATIONS (UNCHANGED STRUCTURE) ===== */}
-      {notifications.length > 0 && (
-        <div className="dashboard-alerts">
-          {notifications.map((note, i) => (
-            <div key={i} className={`alert ${note.type}`}>
-              <span>{note.message}</span>
-              <Link to={note.link}>{note.action}</Link>
+      {/* ===== USER BAR ===== */}
+      <div className="top-bar">
+
+        <div
+          className="top-bar-row"
+          style={{
+            display: "flex",
+            justifyContent:
+              "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "20px",
+          }}
+        >
+
+          {/* USER DETAILS */}
+          <div>
+
+            <h2
+              style={{
+                marginBottom: "6px",
+              }}
+            >
+              {user.name}
+            </h2>
+
+            <div className="top-sub">
+              {user.email}
             </div>
-          ))}
+
+            <div
+              style={{
+                marginTop: "8px",
+              }}
+            >
+              Package:{" "}
+              <b>
+                {(
+                  user.package ||
+                  "none"
+                ).toUpperCase()}
+              </b>
+            </div>
+
+          </div>
+
+          {/* BALANCE */}
+          <div
+            style={{
+              textAlign: "right",
+            }}
+          >
+
+            <div className="balance">
+              KES{" "}
+              {user.balance ?? 0}
+            </div>
+
+            <div
+              style={{
+                opacity: 0.8,
+                marginTop: "4px",
+              }}
+            >
+              Current Balance
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* ===== EARNING ACTIONS ===== */}
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            flexWrap: "wrap",
+            marginTop: "24px",
+          }}
+        >
+
+          <Link
+            to="/ads"
+            className="link-btn"
+          >
+            Watch Ads to Earn
+          </Link>
+
+          <Link
+            to="/survey"
+            className="link-btn"
+          >
+            Survey Questions
+          </Link>
+
+          <Link
+            to="/writing"
+            className="link-btn"
+          >
+            Start Online Writing
+          </Link>
+
+        </div>
+
+        {/* ACTION BUTTONS */}
+        <div
+          style={{
+            marginTop: "24px",
+          }}
+        >
+          <ActionButtons />
+        </div>
+
+      </div>
+
+      {/* ===== SMART ALERTS ===== */}
+      {notifications.length > 0 && (
+        <div
+          className="dashboard-alerts"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "14px",
+            marginBottom: "20px",
+            marginTop: "24px",
+          }}
+        >
+          {notifications.map(
+            (note, index) => (
+              <div
+                key={index}
+                style={{
+                  padding: "16px",
+                  borderRadius: "14px",
+                  display: "flex",
+                  justifyContent:
+                    "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "12px",
+                  color: "#fff",
+                  background:
+                    note.type ===
+                    "warning"
+                      ? "#f59e0b"
+                      : note.type ===
+                        "danger"
+                      ? "#dc2626"
+                      : note.type ===
+                        "success"
+                      ? "#16a34a"
+                      : "#2563eb",
+                }}
+              >
+
+                <div
+                  style={{
+                    flex: 1,
+                    minWidth: "220px",
+                    lineHeight: "1.5",
+                  }}
+                >
+                  {note.message}
+                </div>
+
+                <Link
+                  to={note.link}
+                  style={{
+                    background:
+                      "#ffffff",
+                    color: "#111827",
+                    padding:
+                      "10px 16px",
+                    borderRadius:
+                      "10px",
+                    textDecoration:
+                      "none",
+                    fontWeight: "600",
+                    whiteSpace:
+                      "nowrap",
+                  }}
+                >
+                  {note.action}
+                </Link>
+
+              </div>
+            )
+          )}
         </div>
       )}
 
-      {/* ===== TOP BAR (UNCHANGED) ===== */}
-      <div className="top-bar">
-        <h2>Account Balance</h2>
+      {/* ===== COMPONENTS ===== */}
 
-        <div className="top-sub">
-          {user.name} • {user.email} • Package:{" "}
-          <b>{(user.package || "none").toUpperCase()}</b>
-        </div>
-
-        <div className="balance">
-          KES {user.balance ?? 0}
-        </div>
-
-        <ActionButtons
-          onDepositClick={() => setShowDeposit(true)}
-          onWithdrawClick={() => setShowWithdraw(true)}
-        />
-      </div>
-
-      {/* ===== COMPONENTS (UNCHANGED) ===== */}
       <EarningsCard
-        title="Current Balance"
+        title="Earnings Overview"
         amount={user.balance ?? 0}
       />
 
+      {/* FIXED REFERRALS */}
       <ReferralBox
-        referralCode={user.referralCode}
-        referrals={user.referralCount ?? 0}
+        referralCode={
+          user.referralCode
+        }
+        referrals={
+          user.referralCount ?? 0
+        }
       />
 
-      <Packages user={user} refresh={fetchUser} />
+      {/* PACKAGES */}
+      <Packages
+        user={user}
+        refresh={fetchUser}
+      />
 
-      {/* ===== FOOTER (UNCHANGED) ===== */}
+      {/* ===== FOOTER ===== */}
       <footer className="mm-footer">
+
         <Logo size="sm" />
+
         <span>
-          © {new Date().getFullYear()} Marketminds
+          ©{" "}
+          {new Date().getFullYear()}{" "}
+          Marketminds. All rights
+          reserved.
         </span>
+
       </footer>
 
     </div>
