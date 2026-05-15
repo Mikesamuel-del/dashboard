@@ -1,228 +1,120 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-const API_BASE =
-  process.env.REACT_APP_API_BASE ||
-  "http://localhost:5000";
+const ADGEM_APP_ID = process.env.REACT_APP_ADGEM_APP_ID;
+const ADGEM_WALL_URL = "https://api.adgem.com/v1/wall";
 
-const canAccessWriting = (pkg) =>
-  (pkg || "none").toLowerCase() === "gold";
+const canAccessAdsSurvey = (pkg) => {
+  const p = (pkg || "none").toLowerCase();
+  return p === "gold" || p === "silver";
+};
 
-/* ===== WRITING GIGS (curated real-world style tasks) ===== */
-const WRITING_TASKS = [
-  {
-    id: 1,
-    title: "Blog Writing Task",
-    description:
-      "Write a 500-word article on 'How to start freelancing online'.",
-    reward: 50,
-    link: "https://www.upwork.com/",
-  },
-  {
-    id: 2,
-    title: "Product Review Writing",
-    description:
-      "Write a review for a smartphone or digital product.",
-    reward: 40,
-    link: "https://www.fiverr.com/",
-  },
-  {
-    id: 3,
-    title: "Social Media Content Writing",
-    description:
-      "Create 10 short captions for Instagram marketing.",
-    reward: 30,
-    link: "https://www.freelancer.com/",
-  },
-  {
-    id: 4,
-    title: "SEO Article Writing",
-    description:
-      "Write SEO optimized article for a business website.",
-    reward: 60,
-    link: "https://www.peopleperhour.com/",
-  },
-];
+export default function Ads() {
+  const { user } = useAuth();
 
-export default function Writing() {
-  const { user, updateUser } = useAuth();
-
-  const [completed, setCompleted] = useState([]);
-  const [loadingId, setLoadingId] = useState(null);
-
-  if (!canAccessWriting(user?.package)) {
+  if (!canAccessAdsSurvey(user?.package)) {
     return (
-      <div className="container">
-        <h2>Upgrade Required</h2>
-        <p>
-          Online Writing is available on the Gold package only.
+      <div style={styles.container}>
+        <h2 style={styles.title}>Upgrade Required</h2>
+        <p style={styles.text}>
+          Ads & Surveys are available on Silver or Gold packages.
         </p>
-        <Link to="/">← Back to Dashboard</Link>
+        <Link style={styles.link} to="/">
+          ← Go back to Dashboard
+        </Link>
       </div>
     );
   }
 
-  const completeTask = async (task) => {
-    if (completed.includes(task.id)) {
-      alert("Task already completed.");
+  const openAdGem = () => {
+    if (!user?.id) {
+      alert("User not found");
       return;
     }
 
-    setLoadingId(task.id);
+    const url = `${ADGEM_WALL_URL}?appid=${ADGEM_APP_ID}&player_id=${user.id}`;
 
-    try {
-      // OPTIONAL backend reward tracking
-      await fetch(
-        `${API_BASE}/api/user/writing-reward`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            userId: user?.id,
-            reward: task.reward,
-          }),
-        }
-      ).catch(() => {});
-
-      const newBalance =
-        Number(user?.balance || 0) +
-        task.reward;
-
-      updateUser({
-        balance: newBalance,
-      });
-
-      setCompleted((prev) => [
-        ...prev,
-        task.id,
-      ]);
-
-      alert(
-        `You earned KES ${task.reward}`
-      );
-    } catch (err) {
-      console.log(err);
-      alert("Failed to complete task");
-    } finally {
-      setLoadingId(null);
-    }
+    // Open AdGem offerwall
+    window.open(url, "_blank");
   };
 
   return (
-    <div
-      className="container"
-      style={{
-        padding: "16px",
-        maxWidth: "800px",
-        margin: "0 auto",
-      }}
-    >
-      <Link to="/">← Back to Dashboard</Link>
+    <div style={styles.container}>
+      <Link style={styles.link} to="/">
+        ← Back to Dashboard
+      </Link>
 
-      <h1 style={{ marginTop: "10px" }}>
-        Online Writing Jobs
-      </h1>
+      <h1 style={styles.title}>Earn with Ads</h1>
 
-      <p style={{ opacity: 0.8 }}>
-        Complete writing tasks and earn KES rewards.
+      <p style={styles.subtitle}>
+        Complete offers and surveys to earn real rewards.
       </p>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-          marginTop: "20px",
-        }}
-      >
-        {WRITING_TASKS.map((task) => {
-          const isDone =
-            completed.includes(task.id);
+      <div style={styles.card}>
+        <h3 style={styles.cardTitle}>AdGem Offerwall</h3>
 
-          return (
-            <div
-              key={task.id}
-              style={{
-                padding: "16px",
-                borderRadius: "14px",
-                background:
-                  "rgba(255,255,255,0.05)",
-                border:
-                  "1px solid rgba(255,255,255,0.08)",
-              }}
-            >
-              <h3>{task.title}</h3>
+        <p style={styles.text}>
+          Click below to access verified offers from AdGem. Your earnings will be
+          automatically tracked.
+        </p>
 
-              <p style={{ opacity: 0.8 }}>
-                {task.description}
-              </p>
-
-              <p>
-                Reward:{" "}
-                <b>KES {task.reward}</b>
-              </p>
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  marginTop: "10px",
-                  flexWrap: "wrap",
-                }}
-              >
-                <a
-                  href={task.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    padding: "10px 14px",
-                    background:
-                      "#6b7280",
-                    color: "#fff",
-                    borderRadius:
-                      "10px",
-                    textDecoration:
-                      "none",
-                  }}
-                >
-                  Open Platform
-                </a>
-
-                <button
-                  onClick={() =>
-                    completeTask(task)
-                  }
-                  disabled={
-                    isDone ||
-                    loadingId === task.id
-                  }
-                  style={{
-                    padding: "10px 14px",
-                    background: isDone
-                      ? "#555"
-                      : "#16a34a",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius:
-                      "10px",
-                    cursor: "pointer",
-                  }}
-                >
-                  {loadingId === task.id
-                    ? "Processing..."
-                    : isDone
-                    ? "Completed"
-                    : "Claim Reward"}
-                </button>
-              </div>
-            </div>
-          );
-        })}
+        <button onClick={openAdGem} style={styles.button}>
+          Open Offerwall
+        </button>
       </div>
     </div>
   );
 }
+
+/* ===== GOLD + LIGHT BLACK THEME ===== */
+const styles = {
+  container: {
+    minHeight: "100vh",
+    padding: "20px",
+    maxWidth: "700px",
+    margin: "0 auto",
+    background: "#0b0b0f", // light black
+    color: "#f5f5f5",
+  },
+  title: {
+    color: "#d4af37", // gold
+    fontSize: "28px",
+    marginTop: "15px",
+  },
+  subtitle: {
+    opacity: 0.8,
+    marginBottom: "20px",
+  },
+  text: {
+    opacity: 0.85,
+  },
+  card: {
+    marginTop: "20px",
+    padding: "18px",
+    borderRadius: "14px",
+    background: "rgba(255, 215, 0, 0.06)",
+    border: "1px solid rgba(212, 175, 55, 0.3)",
+  },
+  cardTitle: {
+    color: "#d4af37",
+    marginBottom: "10px",
+  },
+  button: {
+    marginTop: "15px",
+    width: "100%",
+    padding: "12px",
+    borderRadius: "10px",
+    border: "none",
+    background: "#d4af37",
+    color: "#000",
+    fontWeight: "bold",
+    cursor: "pointer",
+  },
+  link: {
+    color: "#d4af37",
+    textDecoration: "none",
+    display: "inline-block",
+    marginBottom: "10px",
+  },
+};
