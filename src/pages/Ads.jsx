@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-const TIMEWALL_URL = "https://timewall.io/offerwall";
+const TIMEWALL_URL = "https://timewall.io/offerwll";
 
 // Only Silver + Gold can access
 const canAccessAdsSurvey = (pkg) => {
