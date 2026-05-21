@@ -2,9 +2,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-const ADGEM_APP_ID = process.env.REACT_APP_ADGEM_APP_ID;
-const ADGEM_WALL_URL = "https://api.adgem.com/v1/wall";
+const TIMEWALL_URL = "https://timewall.io/offerwall";
 
+// Only Silver + Gold can access
 const canAccessAdsSurvey = (pkg) => {
   const p = (pkg || "none").toLowerCase();
   return p === "gold" || p === "silver";
@@ -27,15 +27,18 @@ export default function Ads() {
     );
   }
 
-  const openAdGem = () => {
-    if (!user?.id) {
+  const openTimeWall = () => {
+    if (!user?.id && !user?._id) {
       alert("User not found");
       return;
     }
 
-    const url = `${ADGEM_WALL_URL}?appid=${ADGEM_APP_ID}&player_id=${user.id}`;
+    // IMPORTANT: backend uses MongoDB _id
+    const userId = user._id || user.id;
 
-    // Open AdGem offerwall
+    const url = `${TIMEWALL_URL}?userID=${userId}`;
+
+    // open offerwall in new tab
     window.open(url, "_blank");
   };
 
@@ -48,18 +51,18 @@ export default function Ads() {
       <h1 style={styles.title}>Earn with Ads</h1>
 
       <p style={styles.subtitle}>
-        Complete offers and surveys to earn real rewards.
+        Complete offers and surveys to earn real rewards from TimeWall.
       </p>
 
       <div style={styles.card}>
-        <h3 style={styles.cardTitle}>AdGem Offerwall</h3>
+        <h3 style={styles.cardTitle}>TimeWall Offerwall</h3>
 
         <p style={styles.text}>
-          Click below to access verified offers from AdGem. Your earnings will be
-          automatically tracked.
+          Click below to access verified surveys and offers. Rewards are
+          automatically credited to your account after completion.
         </p>
 
-        <button onClick={openAdGem} style={styles.button}>
+        <button onClick={openTimeWall} style={styles.button}>
           Open Offerwall
         </button>
       </div>
@@ -67,18 +70,18 @@ export default function Ads() {
   );
 }
 
-/* ===== GOLD + LIGHT BLACK THEME ===== */
+/* ===== GOLD + DARK THEME ===== */
 const styles = {
   container: {
     minHeight: "100vh",
     padding: "20px",
     maxWidth: "700px",
     margin: "0 auto",
-    background: "#0b0b0f", // light black
+    background: "#0b0b0f",
     color: "#f5f5f5",
   },
   title: {
-    color: "#d4af37", // gold
+    color: "#d4af37",
     fontSize: "28px",
     marginTop: "15px",
   },
