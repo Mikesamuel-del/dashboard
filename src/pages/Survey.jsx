@@ -2,8 +2,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-// Replace with your real OfferToro App ID
-const OFFER_TORO_APP_ID = "YOUR_APP_ID";
+// Your Freecash referral link
+const FREECASH_URL = "https://freecash.com/r/YOUR_REFERRAL_CODE";
 
 // Only Silver + Gold can access
 const canAccessAdsSurvey = (pkg) => {
@@ -30,18 +30,8 @@ export default function Ads() {
     );
   }
 
-  const openOfferToro = () => {
-    if (!user?._id && !user?.id) {
-      alert("User not found");
-      return;
-    }
-
-    const userId = user._id || user.id;
-
-    const offerToroUrl =
-      `https://www.offertoro.com/ifr/show/${OFFER_TORO_APP_ID}/${userId}`;
-
-    window.open(offerToroUrl, "_blank");
+  const openFreecash = () => {
+    window.open(FREECASH_URL, "_blank");
   };
 
   return (
@@ -50,21 +40,21 @@ export default function Ads() {
         ← Back to Dashboard
       </Link>
 
-      <h1 style={styles.title}>Earn with OfferToro</h1>
+      <h1 style={styles.title}>Earn with Freecash</h1>
 
       <p style={styles.subtitle}>
-        Complete offers, surveys, and games to earn rewards.
+        Complete surveys, games, and offers to earn rewards.
       </p>
 
       <div style={styles.card}>
-        <h3 style={styles.cardTitle}>OfferToro Offerwall</h3>
+        <h3 style={styles.cardTitle}>Freecash Offerwall</h3>
 
         <p style={styles.text}>
-          Access verified tasks and surveys through OfferToro.
+          Access verified surveys and tasks through Freecash.
         </p>
 
-        <button onClick={openOfferToro} style={styles.button}>
-          Open OfferToro
+        <button onClick={openFreecash} style={styles.button}>
+          Open Freecash
         </button>
       </div>
     </div>
