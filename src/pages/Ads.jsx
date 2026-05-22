@@ -2,7 +2,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-const TIMEWALL_URL = "https://timewall.io/offerwll";
+// Your Freecash referral link
+const FREECASH_URL = "https://freecash.com/r/YOUR_REFERRAL_CODE";
 
 // Only Silver + Gold can access
 const canAccessAdsSurvey = (pkg) => {
@@ -17,9 +18,11 @@ export default function Ads() {
     return (
       <div style={styles.container}>
         <h2 style={styles.title}>Upgrade Required</h2>
+
         <p style={styles.text}>
           Ads & Surveys are available on Silver or Gold packages.
         </p>
+
         <Link style={styles.link} to="/">
           ← Go back to Dashboard
         </Link>
@@ -27,19 +30,8 @@ export default function Ads() {
     );
   }
 
-  const openTimeWall = () => {
-    if (!user?.id && !user?._id) {
-      alert("User not found");
-      return;
-    }
-
-    // IMPORTANT: backend uses MongoDB _id
-    const userId = user._id || user.id;
-
-    const url = `${TIMEWALL_URL}?userID=${userId}`;
-
-    // open offerwall in new tab
-    window.open(url, "_blank");
+  const openFreecash = () => {
+    window.open(FREECASH_URL, "_blank");
   };
 
   return (
@@ -48,22 +40,21 @@ export default function Ads() {
         ← Back to Dashboard
       </Link>
 
-      <h1 style={styles.title}>Earn with Ads</h1>
+      <h1 style={styles.title}>Earn with Freecash</h1>
 
       <p style={styles.subtitle}>
-        Complete offers and surveys to earn real rewards from TimeWall.
+        Complete surveys, games, and offers to earn rewards.
       </p>
 
       <div style={styles.card}>
-        <h3 style={styles.cardTitle}>TimeWall Offerwall</h3>
+        <h3 style={styles.cardTitle}>Freecash Offerwall</h3>
 
         <p style={styles.text}>
-          Click below to access verified surveys and offers. Rewards are
-          automatically credited to your account after completion.
+          Access verified surveys and tasks through Freecash.
         </p>
 
-        <button onClick={openTimeWall} style={styles.button}>
-          Open Offerwall
+        <button onClick={openFreecash} style={styles.button}>
+          Open Freecash
         </button>
       </div>
     </div>
@@ -71,6 +62,7 @@ export default function Ads() {
 }
 
 /* ===== GOLD + DARK THEME ===== */
+
 const styles = {
   container: {
     minHeight: "100vh",
@@ -80,18 +72,22 @@ const styles = {
     background: "#0b0b0f",
     color: "#f5f5f5",
   },
+
   title: {
     color: "#d4af37",
     fontSize: "28px",
     marginTop: "15px",
   },
+
   subtitle: {
     opacity: 0.8,
     marginBottom: "20px",
   },
+
   text: {
     opacity: 0.85,
   },
+
   card: {
     marginTop: "20px",
     padding: "18px",
@@ -99,10 +95,12 @@ const styles = {
     background: "rgba(255, 215, 0, 0.06)",
     border: "1px solid rgba(212, 175, 55, 0.3)",
   },
+
   cardTitle: {
     color: "#d4af37",
     marginBottom: "10px",
   },
+
   button: {
     marginTop: "15px",
     width: "100%",
@@ -114,6 +112,7 @@ const styles = {
     fontWeight: "bold",
     cursor: "pointer",
   },
+
   link: {
     color: "#d4af37",
     textDecoration: "none",
